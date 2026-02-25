@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Banquet Dashboard LGH 2026</title>
+    <title>Banquet Dashboard 2026 - Precision Center</title>
     <link rel="icon" type="image/png" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -15,12 +15,48 @@
             display: flex; flex-direction: column; height: 100dvh; gap: 8px; overflow: hidden;
         }
         .card-base { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 1.25rem; padding: 10px; }
-        #date-input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 105px; text-align: right; font-size: 11px; appearance: none; }
+        
+        /* FIX: FORCE CENTER PADA DATE INPUT */
+        #date-input { 
+            background: transparent; 
+            color: white; 
+            border: none; 
+            outline: none; 
+            font-weight: 800; 
+            width: 140px; /* Lebar ditambah sedikit agar teks 25/02/2026 lega */
+            text-align: center; 
+            font-size: 13px; 
+            appearance: none;
+            -webkit-appearance: none;
+            display: block;
+        }
+
+        /* Hilangkan Ikon Kalender Bawaan Chrome/Safari agar teks bisa benar-benar di tengah */
+        #date-input::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+        
+        /* Container untuk posisi absolut indikator kalender di atas */
+        .date-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
         select, .search-input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 13px; appearance: none; }
         select option { background: #0f172a; color: white; }
+
+        .btn-clear { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); padding: 5px 0; border-radius: 8px; font-size: 9px; font-weight: 800; width: 65px; text-align: center; }
+        .btn-today { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); padding: 5px 0; border-radius: 8px; font-size: 9px; font-weight: 800; width: 65px; text-align: center; }
+        
         .filter-btn { padding: 4px 10px; border-radius: 99px; font-size: 8px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
         .filter-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
-        .btn-reset { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); padding: 4px 6px; border-radius: 8px; font-size: 9px; font-weight: 800; }
+
         #event-container { overflow-y: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         #event-container::-webkit-scrollbar { display: none; }
     </style>
@@ -31,7 +67,7 @@
         <div class="card-base py-2 flex flex-col items-center">
             <p class="text-[7px] font-bold uppercase text-slate-500 mb-0.5">Filter Bulan</p>
             <select id="month-select" onchange="resetDateOnly()">
-                <option value="ALL">-- SEMUA BULAN --</option>
+                <option value="ALL">-- SEMUA --</option>
                 <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
                 <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
                 <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
@@ -40,16 +76,23 @@
         </div>
         <div class="card-base py-2 flex flex-col items-center">
             <p class="text-[7px] font-bold uppercase text-indigo-400 mb-0.5">Cari Awal Nama</p>
-            <input type="text" id="customer-search" class="search-input" placeholder="Min 2 Huruf..." oninput="updateDashboard()">
+            <input type="text" id="customer-search" class="search-input" placeholder="Ketik..." oninput="updateDashboard()">
         </div>
     </div>
 
-    <div class="card-base py-1.5 flex justify-between items-center px-3 flex-none">
-        <div class="flex items-center gap-1.5">
-            <button onclick="resetAllFilters()" class="btn-reset">↺ HARI INI</button>
-            <p class="text-[8px] font-bold uppercase text-slate-400">Periode:</p>
+    <div class="card-base py-1.5 grid grid-cols-3 items-center flex-none">
+        <div class="flex justify-start pl-1">
+            <button onclick="resetDateOnly()" class="btn-clear">RESET</button>
         </div>
-        <input type="date" id="date-input" onchange="updateDashboard()">
+        
+        <div class="date-wrapper">
+            <p class="text-[7px] font-bold uppercase text-slate-500 leading-none mb-1">Periode</p>
+            <input type="date" id="date-input" onchange="updateDashboard()">
+        </div>
+        
+        <div class="flex justify-end pr-1">
+            <button onclick="setToday()" class="btn-today">HARI INI</button>
+        </div>
     </div>
 
     <div class="flex justify-center gap-1.5 flex-none">
@@ -61,14 +104,14 @@
 
     <div class="card-base flex-1 flex flex-col overflow-hidden min-h-0">
         <div class="flex justify-between items-center border-b border-white/10 pb-1.5 mb-2">
-            <p id="list-title" class="text-[9px] font-black uppercase text-indigo-400">Loading...</p>
+            <p id="list-title" class="text-[9px] font-black uppercase text-indigo-400 tracking-wider">LOADING...</p>
             <span id="event-count" class="bg-indigo-500 text-white text-[9px] px-2 py-0.5 rounded-full font-black">0</span>
         </div>
         <div id="event-container" class="space-y-2 flex-1"></div>
         <div class="mt-2 pt-2 border-t border-white/10 grid grid-cols-2 flex-none">
             <div class="text-center">
                 <p class="text-[8px] font-bold text-slate-400 uppercase">Gross View</p>
-                <p id="daily-gross" class="text-[14px] font-black">Rp0</p>
+                <p id="daily-gross" class="text-[14px] font-black text-white">Rp0</p>
             </div>
             <div class="text-center border-l border-white/10">
                 <p class="text-[8px] font-bold text-indigo-400 uppercase">Nett View</p>
@@ -78,7 +121,7 @@
     </div>
 
     <div class="card-base bg-gradient-to-br from-indigo-900/60 to-slate-900/80 py-3 text-center flex-none">
-        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-1">MTD PERFORMANCE (FULL MONTH)</p>
+        <p id="mtd-label" class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-1">MTD PERFORMANCE</p>
         <h2 id="mtd-onhand" class="text-2xl font-black tracking-tighter">Rp0</h2>
         <div class="flex items-center gap-3 px-3 mt-1">
             <div class="bg-white/10 h-1.5 flex-1 rounded-full overflow-hidden">
@@ -92,7 +135,7 @@
         <div class="grid grid-cols-2 divide-x divide-white/10">
             <div class="text-center px-1">
                 <p class="text-[8px] font-bold text-slate-500 uppercase mb-0.5">Target Budget</p>
-                <p id="mtd-budget" class="text-[13px] font-black">Rp0</p>
+                <p id="mtd-budget" class="text-[13px] font-black text-white">Rp0</p>
             </div>
             <div class="text-center px-1">
                 <p class="text-[8px] font-bold text-slate-500 uppercase mb-0.5">Variance GAP</p>
@@ -108,16 +151,15 @@
 
         let cachedRows = [];
         let currentStatusFilter = 'ALL';
+        const monthNames = ["", "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
 
-        window.onload = () => resetAllFilters();
+        window.onload = () => setToday();
 
-        function resetAllFilters() {
+        function setToday() {
             const now = new Date();
             const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
             document.getElementById('date-input').value = localDate;
             document.getElementById('month-select').value = (now.getMonth() + 1).toString();
-            document.getElementById('customer-search').value = "";
-            setStatusFilter('ALL');
             updateDashboard();
         }
 
@@ -160,7 +202,6 @@
                 let eventHTML = '';
                 let count = 0, grossDailySum = 0, fullMonthNettSum = 0;
 
-                // 1. LOGIKA UTAMA: Loop seluruh data Summary
                 for (let i = 26; i < cachedRows.length; i++) {
                     const r = cachedRows[i];
                     if (!r || !r[9] || !r[10]) continue;
@@ -170,20 +211,15 @@
                     const sStatus = (r[13] || '').trim().toUpperCase();
                     const sVenue = (r[15] || '').trim().toUpperCase();
                     const gVal = cleanVal(r[14]);
-                    if (sName.toLowerCase().includes("total")) continue;
+                    if (sName.toLowerCase().includes("total") || i >= 88) continue;
 
                     const dateParts = sDate.split('/');
                     if (dateParts.length < 3) continue;
                     const dPart = parseInt(dateParts[0]), mPart = parseInt(dateParts[1]), yPart = dateParts[2];
 
-                    // A. HITUNG FULL MONTH NETT (Untuk MTD Performance)
-                    // Logika: Selama Bulannya sama (atau ALL), tambahkan ke MTD, abaikan filter pencarian atau tanggal.
                     let matchMonth = (monthVal === "ALL" && yPart === "2026") || (mPart === parseInt(monthVal) && yPart === "2026");
-                    if (matchMonth) {
-                        fullMonthNettSum += (gVal / 1.21);
-                    }
+                    if (matchMonth) fullMonthNettSum += (gVal / 1.21);
 
-                    // B. HITUNG FILTERED VIEW (Untuk List yang tampil di layar)
                     let matchTime = false;
                     if (filterMode === "DATE") {
                         const [y, m, d] = dateVal.split('-');
@@ -220,7 +256,6 @@
                     }
                 }
 
-                // 2. LOGIKA TARGET BUDGET (B89:B100)
                 let targetBudget = 0;
                 if (monthVal !== "ALL") {
                     const budgetRowIndex = 88 + (parseInt(monthVal) - 1);
@@ -229,21 +264,21 @@
                     for (let i = 88; i <= 99; i++) { targetBudget += cleanVal(cachedRows[i]?.[1]); }
                 }
 
-                // 3. FINAL CALCULATION
                 const varianceGap = fullMonthNettSum - targetBudget;
                 const ach = targetBudget > 0 ? Math.round((fullMonthNettSum / targetBudget) * 100) : 0;
 
-                // 4. UPDATE UI
                 container.innerHTML = count > 0 ? eventHTML : `<div class="opacity-20 text-[10px] font-bold py-16 uppercase text-center">Data Tidak Ditemukan</div>`;
+                
+                let titleText = filterMode === "DATE" ? `DAILY: ${dateVal}` : (filterMode === "MONTH" ? `MONTHLY: ${monthNames[parseInt(monthVal)]}` : `GLOBAL 2026`);
+                document.getElementById('list-title').innerText = searchVal ? `SEARCH: "${searchVal.toUpperCase()}"` : titleText;
+                
                 document.getElementById('event-count').innerText = count;
                 document.getElementById('daily-gross').innerText = formatRp(grossDailySum);
                 document.getElementById('daily-nett').innerText = formatRp(grossDailySum / 1.21);
-                
-                // MTD Performance sekarang independent (Full Month)
+                document.getElementById('mtd-label').innerText = filterMode === "MONTH" ? `MTD (${monthNames[parseInt(monthVal)]})` : `TOTAL PERFORMANCE`;
                 document.getElementById('mtd-onhand').innerText = formatRp(fullMonthNettSum);
                 document.getElementById('mtd-budget').innerText = formatRp(targetBudget);
                 document.getElementById('mtd-gap').innerText = formatRp(varianceGap);
-                
                 document.getElementById('mtd-gap').className = `text-[13px] font-black ${varianceGap < 0 ? 'text-rose-500' : 'text-emerald-400'}`;
                 document.getElementById('gap-card').style.borderBottomColor = varianceGap < 0 ? "#f43f5e" : "#10b981";
                 document.getElementById('mtd-ach').innerText = ach + "%";
