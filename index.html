@@ -29,7 +29,7 @@
 
     <div class="grid grid-cols-2 gap-2 flex-none">
         <div class="card-base py-2 flex flex-col items-center">
-            <p class="text-[7px] font-bold uppercase text-slate-500 mb-0.5">Filter Bulan (2026)</p>
+            <p class="text-[7px] font-bold uppercase text-slate-500 mb-0.5">Filter Bulan</p>
             <select id="month-select" onchange="resetDateOnly()">
                 <option value="ALL">-- SEMUA BULAN --</option>
                 <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
@@ -39,8 +39,8 @@
             </select>
         </div>
         <div class="card-base py-2 flex flex-col items-center">
-            <p class="text-[7px] font-bold uppercase text-indigo-400 mb-0.5">Cari Awal Nama (Min 2)</p>
-            <input type="text" id="customer-search" class="search-input" placeholder="Contoh: UT..." oninput="updateDashboard()">
+            <p class="text-[7px] font-bold uppercase text-indigo-400 mb-0.5">Cari Awal Nama</p>
+            <input type="text" id="customer-search" class="search-input" placeholder="Min 2 Huruf..." oninput="updateDashboard()">
         </div>
     </div>
 
@@ -61,14 +61,14 @@
 
     <div class="card-base flex-1 flex flex-col overflow-hidden min-h-0">
         <div class="flex justify-between items-center border-b border-white/10 pb-1.5 mb-2">
-            <p id="list-title" class="text-[9px] font-black uppercase text-indigo-400 tracking-wider">Loading...</p>
+            <p id="list-title" class="text-[9px] font-black uppercase text-indigo-400">Loading...</p>
             <span id="event-count" class="bg-indigo-500 text-white text-[9px] px-2 py-0.5 rounded-full font-black">0</span>
         </div>
         <div id="event-container" class="space-y-2 flex-1"></div>
         <div class="mt-2 pt-2 border-t border-white/10 grid grid-cols-2 flex-none">
             <div class="text-center">
                 <p class="text-[8px] font-bold text-slate-400 uppercase">Gross View</p>
-                <p id="daily-gross" class="text-[14px] font-black text-white">Rp0</p>
+                <p id="daily-gross" class="text-[14px] font-black">Rp0</p>
             </div>
             <div class="text-center border-l border-white/10">
                 <p class="text-[8px] font-bold text-indigo-400 uppercase">Nett View</p>
@@ -78,7 +78,7 @@
     </div>
 
     <div class="card-base bg-gradient-to-br from-indigo-900/60 to-slate-900/80 py-3 text-center flex-none">
-        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-1">MTD PERFORMANCE (NETT)</p>
+        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-1">MTD PERFORMANCE (FULL MONTH)</p>
         <h2 id="mtd-onhand" class="text-2xl font-black tracking-tighter">Rp0</h2>
         <div class="flex items-center gap-3 px-3 mt-1">
             <div class="bg-white/10 h-1.5 flex-1 rounded-full overflow-hidden">
@@ -104,7 +104,7 @@
     <script>
         const API_KEY = 'AIzaSyBZjSmOA81ftVsIJT5etEL19NjPdYTVSQk';
         const SHEET_ID = '1MXwfVXORuTd125BCkKYP_mHC_6O_Z1mZcGno2VCGOeE';
-        const RANGE = 'Summary!A1:P150'; // Range sampai 150 agar baris 89-100 terbaca
+        const RANGE = 'Summary!A1:P150';
 
         let cachedRows = [];
         let currentStatusFilter = 'ALL';
@@ -158,22 +158,32 @@
 
                 let filterMode = dateVal ? "DATE" : (monthVal === "ALL" ? "GLOBAL" : "MONTH");
                 let eventHTML = '';
-                let count = 0, grossSum = 0;
+                let count = 0, grossDailySum = 0, fullMonthNettSum = 0;
 
-                // 1. FILTER DATA EVENT (Mulai baris 27 / index 26)
+                // 1. LOGIKA UTAMA: Loop seluruh data Summary
                 for (let i = 26; i < cachedRows.length; i++) {
                     const r = cachedRows[i];
                     if (!r || !r[9] || !r[10]) continue;
+                    
                     const sDate = r[9].toString().trim();
                     const sName = r[10].toString().trim();
                     const sStatus = (r[13] || '').trim().toUpperCase();
                     const sVenue = (r[15] || '').trim().toUpperCase();
+                    const gVal = cleanVal(r[14]);
                     if (sName.toLowerCase().includes("total")) continue;
 
                     const dateParts = sDate.split('/');
                     if (dateParts.length < 3) continue;
                     const dPart = parseInt(dateParts[0]), mPart = parseInt(dateParts[1]), yPart = dateParts[2];
 
+                    // A. HITUNG FULL MONTH NETT (Untuk MTD Performance)
+                    // Logika: Selama Bulannya sama (atau ALL), tambahkan ke MTD, abaikan filter pencarian atau tanggal.
+                    let matchMonth = (monthVal === "ALL" && yPart === "2026") || (mPart === parseInt(monthVal) && yPart === "2026");
+                    if (matchMonth) {
+                        fullMonthNettSum += (gVal / 1.21);
+                    }
+
+                    // B. HITUNG FILTERED VIEW (Untuk List yang tampil di layar)
                     let matchTime = false;
                     if (filterMode === "DATE") {
                         const [y, m, d] = dateVal.split('-');
@@ -187,8 +197,7 @@
 
                     if (matchTime && matchSearch && matchStatus) {
                         count++;
-                        const gVal = cleanVal(r[14]);
-                        grossSum += gVal;
+                        grossDailySum += gVal;
                         
                         let colorClass = 'text-slate-400 bg-slate-500/10';
                         if (sStatus.includes("CONFIRM")) colorClass = 'text-emerald-400 bg-emerald-500/20';
@@ -211,41 +220,32 @@
                     }
                 }
 
-                // 2. LOGIKA BUDGET (B89:B100 Vertikal)
-                const nettView = grossSum / 1.21;
+                // 2. LOGIKA TARGET BUDGET (B89:B100)
                 let targetBudget = 0;
-
                 if (monthVal !== "ALL") {
-                    // Baris 89 adalah index 88 (Januari)
                     const budgetRowIndex = 88 + (parseInt(monthVal) - 1);
-                    // Kolom B adalah index 1
                     targetBudget = cleanVal(cachedRows[budgetRowIndex]?.[1]);
                 } else {
-                    // SUM B89 s/d B100
-                    for (let i = 88; i <= 99; i++) {
-                        targetBudget += cleanVal(cachedRows[i]?.[1]);
-                    }
+                    for (let i = 88; i <= 99; i++) { targetBudget += cleanVal(cachedRows[i]?.[1]); }
                 }
 
-                const varianceGap = nettView - targetBudget;
-                const ach = targetBudget > 0 ? Math.round((nettView / targetBudget) * 100) : 0;
+                // 3. FINAL CALCULATION
+                const varianceGap = fullMonthNettSum - targetBudget;
+                const ach = targetBudget > 0 ? Math.round((fullMonthNettSum / targetBudget) * 100) : 0;
 
-                // 3. UPDATE UI
+                // 4. UPDATE UI
                 container.innerHTML = count > 0 ? eventHTML : `<div class="opacity-20 text-[10px] font-bold py-16 uppercase text-center">Data Tidak Ditemukan</div>`;
-                document.getElementById('list-title').innerText = filterMode === "DATE" ? `Daily Search` : (filterMode === "MONTH" ? `Monthly: ${monthVal}/2026` : `Global 2026`);
                 document.getElementById('event-count').innerText = count;
-                document.getElementById('daily-gross').innerText = formatRp(grossSum);
-                document.getElementById('daily-nett').innerText = formatRp(nettView);
+                document.getElementById('daily-gross').innerText = formatRp(grossDailySum);
+                document.getElementById('daily-nett').innerText = formatRp(grossDailySum / 1.21);
                 
-                // Sinkronkan MTD dengan Nett View
-                document.getElementById('mtd-onhand').innerText = formatRp(nettView);
+                // MTD Performance sekarang independent (Full Month)
+                document.getElementById('mtd-onhand').innerText = formatRp(fullMonthNettSum);
                 document.getElementById('mtd-budget').innerText = formatRp(targetBudget);
                 document.getElementById('mtd-gap').innerText = formatRp(varianceGap);
                 
-                // Color formatting untuk Gap
                 document.getElementById('mtd-gap').className = `text-[13px] font-black ${varianceGap < 0 ? 'text-rose-500' : 'text-emerald-400'}`;
                 document.getElementById('gap-card').style.borderBottomColor = varianceGap < 0 ? "#f43f5e" : "#10b981";
-                
                 document.getElementById('mtd-ach').innerText = ach + "%";
                 document.getElementById('progress-bar').style.width = Math.min(ach, 100) + "%";
 
