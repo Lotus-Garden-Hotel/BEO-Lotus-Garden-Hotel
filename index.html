@@ -3,41 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Banquet Dashboard LGH 2026</title>
+    <t<title>Banquet Dashboard LGH 2026</title>
     <link rel="icon" type="image/png" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         :root { --bg-deep: #020617; --glass: rgba(255, 255, 255, 0.04); --glass-border: rgba(255, 255, 255, 0.1); }
+        
+        /* FIX: Gunakan h-[100dvh] untuk menyesuaikan dengan bar navigasi Android yang dinamis */
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep);
-            color: #f8fafc; padding: 12px; margin: 0; box-sizing: border-box;
-            display: flex; flex-direction: column; height: 100vh; gap: 10px; overflow: hidden;
+            color: #f8fafc; padding: 10px; margin: 0; box-sizing: border-box;
+            display: flex; flex-direction: column; height: 100dvh; gap: 8px; overflow: hidden;
         }
-        .card-base { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 1.25rem; padding: 12px; }
-        input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 14px; }
-        .filter-btn { padding: 5px 12px; border-radius: 99px; font-size: 8px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
-        .filter-btn.active { background: #6366f1; color: white; border-color: #6366f1; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
         
-        /* Event List area set to show ~4 rows perfectly */
-        #event-container { overflow-y: auto; scrollbar-width: none; }
+        .card-base { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 1.25rem; padding: 10px; }
+        input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 14px; }
+        .filter-btn { padding: 4px 10px; border-radius: 99px; font-size: 8px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; }
+        .filter-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
+        
+        /* AREA SCROLL: Hanya bagian ini yang boleh scroll */
+        #event-container { 
+            overflow-y: auto; 
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
         #event-container::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="grid grid-cols-2 gap-3 flex-none">
+    <div class="grid grid-cols-2 gap-2 flex-none">
         <div class="card-base py-2 flex flex-col items-center">
-            <p class="text-[8px] font-bold uppercase text-slate-500 mb-1">Date Search</p>
+            <p class="text-[8px] font-bold uppercase text-slate-500 mb-0.5">Date Search</p>
             <input type="date" id="date-input" onchange="updateDashboard()">
         </div>
         <div class="card-base py-2 flex flex-col items-center">
-            <p class="text-[8px] font-bold uppercase text-indigo-400 mb-1">Customer</p>
+            <p class="text-[8px] font-bold uppercase text-indigo-400 mb-0.5">Customer</p>
             <input type="text" id="customer-search" placeholder="..." oninput="updateDashboard()">
         </div>
     </div>
 
-    <div class="flex justify-center gap-2 flex-none">
+    <div class="flex justify-center gap-1.5 flex-none">
         <button onclick="setStatusFilter('ALL')" id="btn-ALL" class="filter-btn active">ALL</button>
         <button onclick="setStatusFilter('CONFIRM')" id="btn-CONFIRM" class="filter-btn uppercase">Confirm</button>
         <button onclick="setStatusFilter('DONE')" id="btn-DONE" class="filter-btn uppercase">Done</button>
@@ -45,38 +52,38 @@
     </div>
 
     <div class="card-base flex-1 flex flex-col overflow-hidden min-h-0">
-        <div class="flex justify-between items-center border-b border-white/10 pb-2 mb-2">
-            <p class="text-[10px] font-extrabold uppercase text-indigo-400 tracking-wider">Events List</p>
-            <span id="event-count" class="bg-indigo-500 text-white text-[9px] px-2.5 py-0.5 rounded-full font-black">0</span>
+        <div class="flex justify-between items-center border-b border-white/10 pb-1.5 mb-2">
+            <p class="text-[10px] font-extrabold uppercase text-indigo-400 italic">Events List</p>
+            <span id="event-count" class="bg-indigo-500 text-white text-[9px] px-2 py-0.5 rounded-full font-black">0</span>
         </div>
         
-        <div id="event-container" class="space-y-2 flex-1">
+        <div id="event-container" class="space-y-1.5 flex-1">
             </div>
 
-        <div class="mt-2 pt-3 border-t border-white/10 grid grid-cols-2 flex-none">
+        <div class="mt-2 pt-2 border-t border-white/10 grid grid-cols-2 flex-none">
             <div class="text-center">
-                <p class="text-[8px] font-bold text-slate-400 uppercase mb-0.5">Gross Day</p>
-                <p id="daily-gross" class="text-[15px] font-black text-white">Rp0</p>
+                <p class="text-[8px] font-bold text-slate-400 uppercase">Gross Day</p>
+                <p id="daily-gross" class="text-[15px] font-black">Rp0</p>
             </div>
             <div class="text-center border-l border-white/10">
-                <p class="text-[8px] font-bold text-indigo-400 uppercase mb-0.5">Nett Day</p>
+                <p class="text-[8px] font-bold text-indigo-400 uppercase">Nett Day</p>
                 <p id="daily-nett" class="text-[15px] font-black text-indigo-300">Rp0</p>
             </div>
         </div>
     </div>
 
-    <div class="card-base bg-gradient-to-br from-indigo-900/50 to-slate-900/80 py-4 text-center flex-none">
-        <p class="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-200 mb-2">MTD ON-HAND REVENUE</p>
-        <h2 id="mtd-onhand" class="text-3xl font-black tracking-tighter text-white">Rp0</h2>
-        <div class="flex items-center gap-3 px-4 mt-3">
-            <div class="bg-white/10 h-2 flex-1 rounded-full overflow-hidden">
-                <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" style="width: 0%"></div>
+    <div class="card-base bg-gradient-to-br from-indigo-900/50 to-slate-900/80 py-3 text-center flex-none">
+        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-1">MTD ON-HAND REVENUE</p>
+        <h2 id="mtd-onhand" class="text-2xl font-black tracking-tighter">Rp0</h2>
+        <div class="flex items-center gap-3 px-2 mt-2">
+            <div class="bg-white/10 h-1.5 flex-1 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500" style="width: 0%"></div>
             </div>
-            <span id="mtd-ach" class="text-[12px] font-black italic text-indigo-300">0%</span>
+            <span id="mtd-ach" class="text-[11px] font-black italic text-indigo-300">0%</span>
         </div>
     </div>
 
-    <div id="gap-card" class="card-base border-b-4 py-4 flex-none">
+    <div id="gap-card" class="card-base border-b-4 py-4 flex-none mb-1">
         <div class="grid grid-cols-2 divide-x divide-white/10">
             <div class="text-center px-2">
                 <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Target Budget</p>
@@ -164,12 +171,12 @@
                         if (sStatus.includes("TENTATIVE")) colorClass = 'text-amber-400 bg-amber-500/20';
 
                         eventHTML += `
-                            <div class="bg-white/[0.05] border border-white/10 rounded-xl p-3 relative">
+                            <div class="bg-white/[0.05] border border-white/10 rounded-xl p-3 relative flex-none">
                                 <div class="absolute top-0 right-0 flex">
-                                    ${sVenue && sVenue !== 'TBD' ? `<span class="bg-white/10 text-white px-2.5 py-1 text-[7px] font-black border-l border-b border-white/10 uppercase italic">${sVenue}</span>` : ''}
-                                    ${sStatus && sStatus !== 'TBD' ? `<span class="${colorClass} px-2.5 py-1 text-[7px] font-black border-l border-b border-white/10 uppercase">${sStatus}</span>` : ''}
+                                    ${sVenue && sVenue !== 'TBD' ? `<span class="bg-white/10 text-white px-2 py-0.5 text-[7px] font-black border-l border-b border-white/10 uppercase italic">${sVenue}</span>` : ''}
+                                    ${sStatus && sStatus !== 'TBD' ? `<span class="${colorClass} px-2 py-0.5 text-[7px] font-black border-l border-b border-white/10 uppercase">${sStatus}</span>` : ''}
                                 </div>
-                                <p class="text-indigo-300 text-[11px] font-black uppercase truncate pr-24 italic mb-2">${sName}</p>
+                                <p class="text-indigo-300 text-[11px] font-black uppercase truncate pr-24 italic mb-1.5">${sName}</p>
                                 <div class="flex justify-between items-end">
                                     <div class="flex items-baseline gap-1">
                                         <span class="text-2xl font-black text-white leading-none">${r[11]||'0'}</span>
@@ -181,7 +188,7 @@
                     }
                 }
 
-                container.innerHTML = count > 0 ? eventHTML : `<div class="opacity-20 text-[10px] text-center font-bold py-12 uppercase tracking-widest">No Events Found</div>`;
+                container.innerHTML = count > 0 ? eventHTML : `<div class="opacity-20 text-[10px] text-center font-bold py-10 uppercase">No Events</div>`;
                 document.getElementById('event-count').innerText = count;
                 document.getElementById('daily-gross').innerText = formatRp(grossSum);
                 document.getElementById('daily-nett').innerText = formatRp(grossSum / 1.21);
