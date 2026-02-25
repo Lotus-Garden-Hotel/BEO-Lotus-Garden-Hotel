@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Banquet Dashboard LGH 2026</title>
+      <title>Banquet Dashboard LGH 2026</title>
     <link rel="icon" type="image/png" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -12,9 +12,9 @@
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep);
             color: #f8fafc; padding: 10px; margin: 0; box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 8px; min-height: 100vh;
+            display: flex; flex-direction: column; height: 100vh; gap: 8px; overflow: hidden;
         }
-        .card-base { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 1rem; padding: 12px; }
+        .card-base { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 1rem; padding: 10px; }
         input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 13px; }
         .filter-btn { padding: 4px 10px; border-radius: 99px; font-size: 7px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; color: #94a3b8; }
         .filter-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
@@ -24,7 +24,7 @@
 </head>
 <body>
 
-    <div class="grid grid-cols-2 gap-2">
+    <div class="grid grid-cols-2 gap-2 flex-none">
         <div class="card-base flex flex-col items-center py-2">
             <p class="text-[7px] font-bold uppercase text-slate-500">Date Search</p>
             <input type="date" id="date-input" onchange="updateDashboard()">
@@ -35,36 +35,35 @@
         </div>
     </div>
 
-    <div class="flex justify-center gap-1.5">
+    <div class="flex justify-center gap-1.5 flex-none">
         <button onclick="setStatusFilter('ALL')" id="btn-ALL" class="filter-btn active">ALL</button>
         <button onclick="setStatusFilter('CONFIRM')" id="btn-CONFIRM" class="filter-btn uppercase">Confirm</button>
         <button onclick="setStatusFilter('DONE')" id="btn-DONE" class="filter-btn uppercase">Done</button>
         <button onclick="setStatusFilter('TENTATIVE')" id="btn-TENTATIVE" class="filter-btn uppercase">Tentative</button>
     </div>
 
-    <div class="card-base flex-1 flex flex-col p-3 overflow-hidden">
+    <div class="card-base flex-1 flex flex-col min-h-0 overflow-hidden">
         <div class="flex justify-between items-center border-b border-white/5 pb-1.5 mb-2">
             <p class="text-[9px] font-black uppercase text-indigo-400">Events List</p>
             <span id="event-count" class="bg-indigo-500/20 text-indigo-300 text-[8px] px-2 py-0.5 rounded-full font-bold">0</span>
         </div>
         
-        <div id="event-container" class="space-y-1 overflow-y-auto max-h-[380px] pr-1">
-            <div class="text-center opacity-20 py-10 text-[9px] font-bold uppercase italic">Syncing...</div>
-        </div>
+        <div id="event-container" class="space-y-1 overflow-y-auto flex-1 pr-1">
+            </div>
 
-        <div class="mt-auto pt-2 border-t border-white/10 grid grid-cols-2 gap-2">
+        <div class="mt-2 pt-2 border-t border-white/10 grid grid-cols-2 gap-2 flex-none">
             <div class="text-center">
                 <p class="text-[7px] font-bold text-slate-500 uppercase">Gross Day</p>
-                <p id="daily-gross" class="text-[11px] font-black">Rp0</p>
+                <p id="daily-gross" class="text-[12px] font-black text-white">Rp0</p>
             </div>
             <div class="text-center border-l border-white/5">
                 <p class="text-[7px] font-bold text-indigo-400 uppercase">Nett Day</p>
-                <p id="daily-nett" class="text-[11px] font-black text-indigo-300">Rp0</p>
+                <p id="daily-nett" class="text-[12px] font-black text-indigo-300">Rp0</p>
             </div>
         </div>
     </div>
 
-    <div class="card-base bg-gradient-to-br from-indigo-900/40 to-slate-900/60 py-3 text-center">
+    <div class="card-base bg-gradient-to-br from-indigo-900/40 to-slate-900/60 py-3 text-center flex-none">
         <p class="text-[8px] font-bold uppercase tracking-[0.2em] text-indigo-200/50 mb-1">MTD ON-HAND REVENUE</p>
         <h2 id="mtd-onhand" class="text-2xl font-black tracking-tighter mb-2">Rp0</h2>
         <div class="flex items-center gap-3 px-2">
@@ -75,15 +74,15 @@
         </div>
     </div>
 
-    <div id="gap-card" class="card-base border-b-2 py-2">
+    <div id="gap-card" class="card-base border-b-2 py-2 flex-none">
         <div class="grid grid-cols-2 divide-x divide-white/10">
             <div class="text-center">
                 <p class="text-[7px] font-bold text-slate-500 uppercase">Target Budget</p>
-                <p id="mtd-budget" class="text-[10px] font-extrabold text-white">Rp0</p>
+                <p id="mtd-budget" class="text-[11px] font-extrabold text-white">Rp0</p>
             </div>
             <div class="text-center">
                 <p class="text-[7px] font-bold text-slate-500 uppercase">Variance Gap</p>
-                <p id="mtd-gap" class="text-[10px] font-extrabold">Rp0</p>
+                <p id="mtd-gap" class="text-[11px] font-extrabold">Rp0</p>
             </div>
         </div>
     </div>
@@ -144,7 +143,6 @@
 
                     const sDate = r[9].toString().trim();
                     const sName = r[10].toString();
-                    
                     const getClean = (v) => (!v || v.toUpperCase() === 'TBD') ? '' : v;
                     const sStatus = getClean(r[13]).toUpperCase(); 
                     const sVenue = getClean(r[15]).toUpperCase();  
@@ -194,7 +192,7 @@
                 document.getElementById('mtd-budget').innerText = formatRp(bVal);
                 document.getElementById('mtd-onhand').innerText = formatRp(oVal);
                 document.getElementById('mtd-gap').innerText = formatRp(vVal);
-                document.getElementById('mtd-gap').className = `text-[10px] font-extrabold ${vVal < 0 ? 'text-rose-500' : 'text-emerald-500'}`;
+                document.getElementById('mtd-gap').className = `text-[11px] font-extrabold ${vVal < 0 ? 'text-rose-500' : 'text-emerald-500'}`;
                 document.getElementById('gap-card').style.borderBottomColor = vVal < 0 ? "#f43f5e" : "#10b981";
                 const ach = bVal > 0 ? Math.round((oVal / bVal) * 100) : 0;
                 document.getElementById('mtd-ach').innerText = ach + "%";
