@@ -275,7 +275,7 @@
                 document.getElementById('event-count').innerText = count;
                 document.getElementById('daily-gross').innerText = formatRp(grossDailySum);
                 document.getElementById('daily-nett').innerText = formatRp(grossDailySum / 1.21);
-                document.getElementById('mtd-label').innerText = filterMode === "MONTH" ? `MTD (${monthNames[parseInt(monthVal)]})` : `TOTAL PERFORMANCE`;
+                document.getElementById('mtd-label').innerText = filterMode === "MONTH" ? `MTD ONHAND(${monthNames[parseInt(monthVal)]})` : `TOTAL ONHAND PERFORMANCE`;
                 document.getElementById('mtd-onhand').innerText = formatRp(fullMonthNettSum);
                 document.getElementById('mtd-budget').innerText = formatRp(targetBudget);
                 document.getElementById('mtd-gap').innerText = formatRp(varianceGap);
