@@ -3,76 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    < <title>Banquet Dashboard LGH 2026</title>
+    <t< <title>Banquet Dashboard LGH 2026</title>
     <link rel="icon" type="image/png" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         :root { --bg-deep: #020617; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(255, 255, 255, 0.08); }
-        
-        /* FIX: Body harus height tetap dan overflow hidden agar tidak goyang */
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep);
             color: #f8fafc; padding: 10px; margin: 0; box-sizing: border-box;
-            display: flex; flex-direction: column; height: 100vh; gap: 6px; overflow: hidden;
+            display: flex; flex-direction: column; gap: 8px; min-height: 100vh;
         }
-        
-        .card-base { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 1rem; padding: 10px; }
+        .card-base { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 1rem; padding: 12px; }
         input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 13px; }
         .filter-btn { padding: 4px 10px; border-radius: 99px; font-size: 7px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; color: #94a3b8; }
         .filter-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
-        
-        /* FIX: Area scroll yang smooth untuk Android */
-        #event-container {
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none; /* Firefox */
-        }
-        #event-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="grid grid-cols-2 gap-2 flex-none">
-        <div class="card-base flex flex-col items-center py-1.5">
-            <p class="text-[7px] font-bold uppercase text-slate-500">Date</p>
+    <div class="grid grid-cols-2 gap-2">
+        <div class="card-base flex flex-col items-center py-2">
+            <p class="text-[7px] font-bold uppercase text-slate-500">Date Search</p>
             <input type="date" id="date-input" onchange="updateDashboard()">
         </div>
-        <div class="card-base flex flex-col items-center py-1.5">
+        <div class="card-base flex flex-col items-center py-2">
             <p class="text-[7px] font-bold uppercase text-indigo-400">Customer</p>
             <input type="text" id="customer-search" placeholder="..." oninput="updateDashboard()">
         </div>
     </div>
 
-    <div class="flex justify-center gap-1.5 flex-none">
+    <div class="flex justify-center gap-1.5">
         <button onclick="setStatusFilter('ALL')" id="btn-ALL" class="filter-btn active">ALL</button>
         <button onclick="setStatusFilter('CONFIRM')" id="btn-CONFIRM" class="filter-btn uppercase">Confirm</button>
         <button onclick="setStatusFilter('DONE')" id="btn-DONE" class="filter-btn uppercase">Done</button>
         <button onclick="setStatusFilter('TENTATIVE')" id="btn-TENTATIVE" class="filter-btn uppercase">Tentative</button>
     </div>
 
-    <div class="card-base flex-1 flex flex-col overflow-hidden min-h-0">
-        <div class="flex justify-between items-center border-b border-white/5 pb-1 mb-1.5">
-            <p class="text-[9px] font-black uppercase text-indigo-400 italic">Events</p>
+    <div class="card-base flex-1 flex flex-col p-3 overflow-hidden">
+        <div class="flex justify-between items-center border-b border-white/5 pb-1.5 mb-2">
+            <p class="text-[9px] font-black uppercase text-indigo-400">Events List</p>
             <span id="event-count" class="bg-indigo-500/20 text-indigo-300 text-[8px] px-2 py-0.5 rounded-full font-bold">0</span>
         </div>
         
-        <div id="event-container" class="space-y-1.5 flex-1">
-            </div>
+        <div id="event-container" class="space-y-1 overflow-y-auto max-h-[380px] pr-1">
+            <div class="text-center opacity-20 py-10 text-[9px] font-bold uppercase italic">Syncing...</div>
+        </div>
 
-        <div class="mt-2 pt-2 border-t border-white/10 grid grid-cols-2 flex-none">
+        <div class="mt-auto pt-2 border-t border-white/10 grid grid-cols-2 gap-2">
             <div class="text-center">
                 <p class="text-[7px] font-bold text-slate-500 uppercase">Gross Day</p>
-                <p id="daily-gross" class="text-[12px] font-black">Rp0</p>
+                <p id="daily-gross" class="text-[11px] font-black">Rp0</p>
             </div>
             <div class="text-center border-l border-white/5">
                 <p class="text-[7px] font-bold text-indigo-400 uppercase">Nett Day</p>
-                <p id="daily-nett" class="text-[12px] font-black text-indigo-300">Rp0</p>
+                <p id="daily-nett" class="text-[11px] font-black text-indigo-300">Rp0</p>
             </div>
         </div>
     </div>
 
-    <div class="card-base bg-gradient-to-br from-indigo-900/40 to-slate-900/60 py-3 text-center flex-none">
+    <div class="card-base bg-gradient-to-br from-indigo-900/40 to-slate-900/60 py-3 text-center">
         <p class="text-[8px] font-bold uppercase tracking-[0.2em] text-indigo-200/50 mb-1">MTD ON-HAND REVENUE</p>
         <h2 id="mtd-onhand" class="text-2xl font-black tracking-tighter mb-2">Rp0</h2>
         <div class="flex items-center gap-3 px-2">
@@ -83,15 +75,15 @@
         </div>
     </div>
 
-    <div id="gap-card" class="card-base border-b-2 py-2 flex-none">
+    <div id="gap-card" class="card-base border-b-2 py-2">
         <div class="grid grid-cols-2 divide-x divide-white/10">
-            <div class="text-center px-1">
+            <div class="text-center">
                 <p class="text-[7px] font-bold text-slate-500 uppercase">Target Budget</p>
-                <p id="mtd-budget" class="text-[11px] font-extrabold">Rp0</p>
+                <p id="mtd-budget" class="text-[10px] font-extrabold text-white">Rp0</p>
             </div>
-            <div class="text-center px-1">
+            <div class="text-center">
                 <p class="text-[7px] font-bold text-slate-500 uppercase">Variance Gap</p>
-                <p id="mtd-gap" class="text-[11px] font-extrabold">Rp0</p>
+                <p id="mtd-gap" class="text-[10px] font-extrabold">Rp0</p>
             </div>
         </div>
     </div>
@@ -152,6 +144,7 @@
 
                     const sDate = r[9].toString().trim();
                     const sName = r[10].toString();
+                    
                     const getClean = (v) => (!v || v.toUpperCase() === 'TBD') ? '' : v;
                     const sStatus = getClean(r[13]).toUpperCase(); 
                     const sVenue = getClean(r[15]).toUpperCase();  
@@ -172,7 +165,7 @@
                         if (sStatus.includes("TENTATIVE")) colorClass = 'text-amber-400 bg-amber-500/20';
 
                         eventHTML += `
-                            <div class="bg-white/[0.03] border border-white/5 rounded-lg p-2 relative">
+                            <div class="bg-white/[0.03] border border-white/5 rounded-lg p-2.5 relative">
                                 <div class="absolute top-0 right-0 flex">
                                     ${sVenue ? `<span class="bg-white/10 text-white px-2 py-0.5 text-[6px] font-black border-l border-b border-white/5 uppercase italic">${sVenue}</span>` : ''}
                                     ${sStatus ? `<span class="${colorClass} px-2 py-0.5 text-[6px] font-black border-l border-b border-white/5 uppercase">${sStatus}</span>` : ''}
@@ -183,7 +176,7 @@
                                         <span class="text-lg font-black text-white">${r[11]||'0'}</span>
                                         <span class="text-[6px] text-slate-500 font-bold uppercase">Pax</span>
                                     </div>
-                                    <div class="bg-indigo-500/20 px-2 py-0.5 rounded-full text-[7px] font-extrabold text-indigo-100 tracking-tight border border-indigo-500/30">
+                                    <div class="bg-indigo-500/20 px-2.5 py-0.5 rounded-full text-[7px] font-extrabold text-indigo-100 tracking-tight border border-indigo-500/30">
                                         ${sDate}
                                     </div>
                                     <p class="text-emerald-400 text-[11px] font-black">${formatRp(gVal)}</p>
@@ -201,7 +194,7 @@
                 document.getElementById('mtd-budget').innerText = formatRp(bVal);
                 document.getElementById('mtd-onhand').innerText = formatRp(oVal);
                 document.getElementById('mtd-gap').innerText = formatRp(vVal);
-                document.getElementById('mtd-gap').className = `text-[11px] font-extrabold ${vVal < 0 ? 'text-rose-500' : 'text-emerald-500'}`;
+                document.getElementById('mtd-gap').className = `text-[10px] font-extrabold ${vVal < 0 ? 'text-rose-500' : 'text-emerald-500'}`;
                 document.getElementById('gap-card').style.borderBottomColor = vVal < 0 ? "#f43f5e" : "#10b981";
                 const ach = bVal > 0 ? Math.round((oVal / bVal) * 100) : 0;
                 document.getElementById('mtd-ach').innerText = ach + "%";
