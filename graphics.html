@@ -3,57 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banquet Dashboard 2026 - Ultimate Fix</title>
+    <title>Banquet Analytics 2026</title>
     <link rel="icon" type="image/png" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background-color: #020617; color: white; font-family: sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: white; padding: 15px; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.5rem; padding: 15px; margin-bottom: 15px; }
+        .nav-btn { background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; padding: 8px 15px; border-radius: 10px; font-size: 10px; font-weight: 800; }
     </style>
 </head>
 <body>
-    <div class="p-5">
-        <a href="index.html" class="text-indigo-400 text-xs font-bold uppercase">← Kembali ke Dashboard</a>
-        <h1 class="text-xl font-black mt-4">BANQUET ANALYTICS</h1>
-        <div id="chart_div" class="w-full h-[400px] mt-10"></div>
+
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-xl font-black italic tracking-tight">BANQUET ANALYTICS</h1>
+            <p class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Performance Year 2026</p>
+        </div>
+        <a href="index.html" class="nav-btn">← DASHBOARD</a>
+    </div>
+
+    <div class="glass-card">
+        <p class="text-[9px] font-black text-indigo-400 uppercase mb-4 tracking-widest text-center">Average Achievement (%) vs Budget</p>
+        <div class="relative h-[250px] flex justify-center">
+            <canvas id="achChart"></canvas>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <p class="text-[9px] font-black text-emerald-400 uppercase mb-4 tracking-widest text-center">Monthly Revenue vs Budget (IDR)</p>
+        <div class="h-[300px]">
+            <canvas id="budgetChart"></canvas>
+        </div>
     </div>
 
     <script>
-        google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(drawChart);
+        const API_KEY = 'AIzaSyBZjSmOA81ftVsIJT5etEL19NjPdYTVSQk';
+        const SHEET_ID = '1MXwfVXORuTd125BCkKYP_mHC_6O_Z1mZcGno2VCGOeE';
+        const RANGE = 'Summary!A1:P100';
+        const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
-        async function drawChart() {
-            // Pastikan API KEY & ID benar seperti di index.html
-            const API_KEY = 'AIzaSyBZjSmOA81ftVsIJT5etEL19NjPdYTVSQk';
-            const SHEET_ID = '1MXwfVXORuTd125BCkKYP_mHC_6O_Z1mZcGno2VCGOeE';
-            
-            try {
-                const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Summary!A27:P87?key=${API_KEY}`);
-                const data = await response.json();
-                const rows = data.values;
+        async function initCharts() {
+            const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`);
+            const data = await res.json();
+            const rows = data.values || [];
 
-                // Proses data lo di sini untuk grafik...
-                // Contoh sederhana data statis dulu untuk tes:
-                var dataTable = google.visualization.arrayToDataTable([
-                    ['Status', 'Total'],
-                    ['Confirm', 10],
-                    ['Done', 15],
-                    ['Tentative', 5]
-                ]);
+            let realData = new Array(12).fill(0);
+            let budgetData = new Array(12).fill(0);
+            let achData = new Array(12).fill(0);
 
-                var options = {
-                    backgroundColor: 'transparent',
-                    legend: {textStyle: {color: 'white'}},
-                    pieHole: 0.4,
-                    colors: ['#10b981', '#6366f1', '#f59e0b']
-                };
-
-                var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-                chart.draw(dataTable, options);
-            } catch (e) {
-                console.error("Gagal load data sheets:", e);
+            // Parsing Data (Sesuai struktur index.html sebelumnya)
+            // Ambil Nett Value dari list event
+            for (let i = 26; i < 88; i++) {
+                const r = rows[i];
+                if (!r || !r[9]) continue;
+                const mPart = parseInt(r[9].split('/')[1]);
+                const nettVal = (parseFloat(r[14].replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0) / 1.21;
+                if (mPart >= 1 && mPart <= 12) realData[mPart - 1] += nettVal;
             }
+
+            // Ambil Budget dari baris 89-100
+            for (let j = 88; j <= 99; j++) {
+                const bVal = parseFloat(rows[j]?.[1]?.replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
+                budgetData[j - 88] = bVal;
+                // Hitung % Achievement
+                achData[j - 88] = bVal > 0 ? Math.round((realData[j - 88] / bVal) * 100) : 0;
+            }
+
+            // --- RENDER CHART 1 (Polar Area / ACH%) ---
+            new Chart(document.getElementById('achChart'), {
+                type: 'polarArea',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        data: achData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.4)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: { r: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // --- RENDER CHART 2 (Bar Comparison) ---
+            new Chart(document.getElementById('budgetChart'), {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Realization',
+                            data: realData,
+                            backgroundColor: '#10b981',
+                            borderRadius: 5
+                        },
+                        {
+                            label: 'Budget',
+                            data: budgetData,
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            borderRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 8 } } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 8 } } }
+                    }
+                }
+            });
         }
+
+        initCharts();
     </script>
 </body>
 </html>
