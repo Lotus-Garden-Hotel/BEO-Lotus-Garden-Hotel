@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Banquet Dashboard 2026 - Ultimate Fix</title>
+    <title>Banquet Dashboard 2026 - Ultimate Master</title>
     <link rel="icon" type="image/png" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -17,7 +17,7 @@
         .filter-btn { padding: 4px 10px; border-radius: 99px; font-size: 8px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; white-space: nowrap; }
         .filter-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
         .action-btn { background: rgba(255,255,255,0.1); color: white; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
-        .action-btn:active { transform: scale(0.9); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         #event-container { overflow-y: auto; scrollbar-width: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
@@ -26,7 +26,7 @@
 
     <div class="flex justify-between items-center px-1 flex-none">
         <div>
-            <h1 class="text-sm font-black italic tracking-tighter uppercase leading-none">Banquet Dashboard</h1>
+            <h1 class="text-sm font-black italic tracking-tighter uppercase leading-none text-indigo-400">Banquet Dashboard</h1>
             <p class="text-[7px] font-bold text-slate-500 tracking-[0.2em]">KEDIRI - 2026</p>
         </div>
         <a href="graphics.html" class="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full text-[9px] font-black uppercase border border-indigo-500/30">Analytics View →</a>
@@ -77,13 +77,13 @@
 
     <div class="card-base flex-1 flex flex-col overflow-hidden min-h-0">
         <div class="flex justify-between items-center border-b border-white/10 pb-1.5 mb-2">
-            <p id="list-title" class="text-[9px] font-black uppercase text-indigo-400 italic">DAILY: LOADING...</p>
+            <p id="list-title" class="text-[9px] font-black uppercase text-indigo-400 italic">LOADING...</p>
             <span id="event-count" class="bg-indigo-500 text-white text-[9px] px-2 py-0.5 rounded-full font-black">0</span>
         </div>
         <div id="event-container" class="space-y-2 flex-1"></div>
         <div class="mt-2 pt-2 border-t border-white/10 grid grid-cols-2 flex-none">
-            <div class="text-center"><p class="text-[8px] font-bold text-slate-400 uppercase">Gross View</p><p id="daily-gross" class="text-[14px] font-black">Rp0</p></div>
-            <div class="text-center border-l border-white/10"><p class="text-[8px] font-bold text-indigo-400 uppercase">Nett View</p><p id="daily-nett" class="text-[14px] font-black text-indigo-300">Rp0</p></div>
+            <div class="text-center"><p class="text-[8px] font-bold text-slate-400 uppercase leading-none mb-1">Gross View</p><p id="daily-gross" class="text-[14px] font-black">Rp0</p></div>
+            <div class="text-center border-l border-white/10"><p class="text-[8px] font-bold text-indigo-400 uppercase leading-none mb-1">Nett View</p><p id="daily-nett" class="text-[14px] font-black text-indigo-300">Rp0</p></div>
         </div>
     </div>
 
@@ -101,11 +101,11 @@
     <div id="gap-card" class="card-base border-b-4 py-3 flex-none mb-1" style="border-bottom-color: #1e293b;">
         <div class="grid grid-cols-2 divide-x divide-white/10">
             <div class="text-center px-1">
-                <p class="text-[8px] font-bold text-slate-500 uppercase mb-0.5">Target Budget</p>
+                <p class="text-[8px] font-bold text-slate-500 uppercase mb-0.5 leading-none">Target Budget</p>
                 <p id="mtd-budget" class="text-[13px] font-black">Rp0</p>
             </div>
             <div class="text-center px-1">
-                <p class="text-[8px] font-bold text-slate-500 uppercase mb-0.5">Variance GAP</p>
+                <p class="text-[8px] font-bold text-slate-500 uppercase mb-0.5 leading-none">Variance GAP</p>
                 <p id="mtd-gap" class="text-[13px] font-black">Rp0</p>
             </div>
         </div>
@@ -123,11 +123,25 @@
 
         window.onload = () => setToday();
 
+        // FUNGSI SUPER REFRESH (Clear & Reset)
         async function refreshData() {
             const btn = document.getElementById('btn-refresh');
+            const searchInput = document.getElementById('customer-search');
+            
             btn.style.animation = "spin 1s linear infinite";
-            cachedRows = [];
+            
+            // Reset UI & Search
+            if (searchInput) searchInput.value = "";
+            currentStatusFilter = 'ALL';
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-ALL').classList.add('active');
+            isHighValueMode = false;
+            document.getElementById('btn-hv').style.background = 'rgba(255,255,255,0.1)';
+            
+            cachedRows = []; // Force fetch
+            setToday(); 
             await updateDashboard();
+            
             setTimeout(() => btn.style.animation = "none", 800);
         }
 
@@ -193,7 +207,7 @@
             const searchInput = document.getElementById('customer-search').value.toLowerCase().trim();
             const dateVal = document.getElementById('date-input').value;
             const monthVal = document.getElementById('month-select').value;
-            const searchVal = searchInput.length >= 1 ? searchInput : "";
+            const searchVal = searchInput.length >= 2 ? searchInput : "";
 
             try {
                 if (cachedRows.length === 0) {
@@ -239,14 +253,13 @@
                         else if (sStatus.includes("DONE")) colorClass = 'text-indigo-300 bg-indigo-500/30';
                         else if (sStatus.includes("TENTATIVE")) colorClass = 'text-amber-400 bg-amber-500/20';
 
-                        // KETERANGAN TANGGAL DIKEMBALIKAN DISINI
                         eventHTML += `<div class="bg-white/[0.06] border border-white/10 rounded-xl p-3 relative text-left">
                             <div class="absolute top-0 right-0 flex items-center">
-                                <span class="bg-white/20 text-indigo-100 px-2 py-0.5 text-[6px] font-black border-l border-b border-white/10 italic">${sDate}</span>
+                                <span class="bg-indigo-500/10 text-indigo-200 px-2 py-0.5 text-[6px] font-black border-l border-b border-white/10 italic">${sDate}</span>
                                 <span class="bg-white/10 text-white px-2 py-0.5 text-[6px] font-black border-l border-b border-white/10 uppercase">${sVenue || 'TBD'}</span>
                                 <span class="${colorClass} px-2 py-0.5 text-[6px] font-black border-l border-b border-white/10 uppercase">${sStatus}</span>
                             </div>
-                            <p class="text-indigo-300 text-[11px] font-black uppercase truncate pr-28 italic mb-1.5">${sName}</p>
+                            <p class="text-indigo-300 text-[11px] font-black uppercase truncate pr-32 italic mb-1.5">${sName}</p>
                             <div class="flex justify-between items-end leading-none">
                                 <p class="text-2xl font-black text-white">${r[11]||'0'}<span class="text-[8px] text-slate-500 ml-1">PAX</span></p>
                                 <p class="text-emerald-400 text-sm font-black">${formatRp(gVal)}</p>
@@ -262,8 +275,8 @@
                 const varianceGap = dynamicMtdNett - targetBudget;
                 const ach = targetBudget > 0 ? Math.round((dynamicMtdNett / targetBudget) * 100) : 0;
 
-                container.innerHTML = count > 0 ? eventHTML : `<div class="py-20 opacity-20 text-center text-xs font-bold uppercase tracking-widest">Kosong</div>`;
-                document.getElementById('list-title').innerText = filterMode === "DATE" ? `DAILY: ${dateVal}` : `MONTHLY: ${monthNames[parseInt(monthVal)] || 'TAHUNAN'}`;
+                container.innerHTML = count > 0 ? eventHTML : `<div class="py-20 opacity-20 text-center text-[10px] font-bold uppercase tracking-[0.3em]">Data Kosong</div>`;
+                document.getElementById('list-title').innerText = searchVal ? `SEARCH: "${searchVal.toUpperCase()}"` : (filterMode === "DATE" ? `DAILY: ${dateVal}` : `MONTHLY: ${monthNames[parseInt(monthVal)] || 'TAHUNAN'}`);
                 document.getElementById('event-count').innerText = count;
                 document.getElementById('daily-gross').innerText = formatRp(grossDailySum);
                 document.getElementById('daily-nett').innerText = formatRp(grossDailySum / 1.21);
