@@ -207,7 +207,7 @@
             const searchInput = document.getElementById('customer-search').value.toLowerCase().trim();
             const dateVal = document.getElementById('date-input').value;
             const monthVal = document.getElementById('month-select').value;
-            const searchVal = searchInput.length >= 2 ? searchInput : "";
+            const searchVal = searchInput.length >= 1 ? searchInput : "";
 
             try {
                 if (cachedRows.length === 0) {
