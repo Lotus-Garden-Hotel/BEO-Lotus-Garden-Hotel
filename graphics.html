@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banquet Analytics - V.6.0</title>
+    <title>Banquet Analytics - V.6.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -11,9 +11,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         :root { --bg: #020617; --card: rgba(255, 255, 255, 0.05); }
         body.night-mode { --bg: #000000 !important; --card: rgba(15, 23, 42, 0.8) !important; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #f8fafc; padding: 15px; transition: 0.3s; min-height: 100vh; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #f8fafc; padding: 15px; transition: 0.3s; min-height: 100vh; padding-bottom: 30px; }
         .card-base { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 15px; }
-        /* Efek tekan tombol */
         .btn-nav:active { transform: scale(0.95); opacity: 0.8; }
     </style>
 </head>
@@ -21,9 +20,9 @@
     <div class="flex items-center justify-between mb-6 px-1">
         <div class="flex items-center gap-4">
             <button onclick="window.location.href='index.html'" class="btn-nav bg-white/10 px-3 py-1.5 rounded-xl text-indigo-400 font-bold text-[10px] border border-white/5 tracking-tighter">← DASHBOARD</button>
-            <h1 class="text-lg font-black uppercase italic tracking-tighter">Analytics</h1>
+            <h1 class="text-lg font-black uppercase italic tracking-tighter">Analytics <span class="text-indigo-500 text-xs">V.6.1</span></h1>
         </div>
-        <div class="text-[8px] font-black bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full border border-indigo-500/30 uppercase italic">Live Performance</div>
+        <div class="text-[8px] font-black bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full border border-indigo-500/30 uppercase italic">Live Data</div>
     </div>
 
     <div class="space-y-4">
@@ -38,30 +37,42 @@
                     <p class="text-[7px] font-bold text-slate-500 uppercase leading-none">Nett YTD</p>
                 </div>
             </div>
-            <div class="relative h-[300px]"><canvas id="revenueChart"></canvas></div>
+            <div class="relative h-[280px]"><canvas id="revenueChart"></canvas></div>
         </div>
 
-        <div class="grid grid-cols-3 gap-2">
-            <div class="card-base text-center border-b-2 border-emerald-500 px-1">
-                <p class="text-[7px] font-black text-slate-500 uppercase mb-1">Annual Progress</p>
-                <h2 id="annual-progress" class="text-base font-black text-emerald-400">0%</h2>
+        <div class="grid grid-cols-2 gap-2">
+            <div class="card-base text-center border-b-2 border-emerald-500 py-3">
+                <p class="text-[7px] font-black text-slate-500 uppercase mb-1 tracking-widest">Annual Progress</p>
+                <h2 id="annual-progress" class="text-lg font-black text-emerald-400">0%</h2>
             </div>
-            <div class="card-base text-center border-b-2 border-indigo-500 px-1">
-                <p class="text-[7px] font-black text-slate-500 uppercase mb-1">Monthly Avg</p>
-                <h2 id="avg-ach" class="text-base font-black text-indigo-400">0%</h2>
+            <div class="card-base text-center border-b-2 border-amber-500 py-3">
+                <p class="text-[7px] font-black text-slate-500 uppercase mb-1 tracking-widest">Total Pax YTD</p>
+                <h2 id="total-pax-count" class="text-lg font-black text-amber-400">0</h2>
             </div>
-            <div class="card-base text-center border-b-2 border-slate-700 px-1">
-                <p class="text-[7px] font-black text-slate-500 uppercase mb-1">Events</p>
-                <h2 id="total-event-count" class="text-base font-black text-white">0</h2>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+            <div class="card-base text-center border-b-2 border-indigo-500 py-3">
+                <p class="text-[7px] font-black text-slate-500 uppercase mb-1 tracking-widest">Avg Achievement</p>
+                <h2 id="avg-ach" class="text-lg font-black text-indigo-400">0%</h2>
             </div>
+            <div class="card-base text-center border-b-2 border-slate-700 py-3">
+                <p class="text-[7px] font-black text-slate-500 uppercase mb-1 tracking-widest">Confirmed Events</p>
+                <h2 id="total-event-count" class="text-lg font-black text-white">0</h2>
+            </div>
+        </div>
+
+        <div class="card-base">
+            <p class="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">Venue Usage Intensity</p>
+            <div id="venue-list" class="grid grid-cols-2 gap-2">
+                </div>
         </div>
     </div>
 
     <script>
-        // SCRIPT TETAP SAMA PERSIS SESUAI REQUEST
         const API_KEY = 'AIzaSyBZjSmOA81ftVsIJT5etEL19NjPdYTVSQk';
         const SHEET_ID = '1MXwfVXORuTd125BCkKYP_mHC_6O_Z1mZcGno2VCGOeE';
-        const RANGE = 'Summary!A1:P150';
+        const RANGE = 'Summary!A1:P200';
         Chart.register(ChartDataLabels);
 
         window.onload = () => {
@@ -75,28 +86,63 @@
                 const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`);
                 const data = await res.json();
                 const rows = data.values;
-                let budgetData = []; let totalBudgetSetahun = 0;
-                for(let i=88; i<=99; i++) { const bVal = cleanVal(rows[i]?.[1]); budgetData.push(bVal); totalBudgetSetahun += bVal; }
                 
-                let realData = new Array(12).fill(0); let count = 0, annualNett = 0;
+                // 1. Process Budget
+                let budgetData = []; let totalBudgetSetahun = 0;
+                for(let i=88; i<=99; i++) { 
+                    const bVal = cleanVal(rows[i]?.[1]); 
+                    budgetData.push(bVal); 
+                    totalBudgetSetahun += bVal; 
+                }
+                
+                // 2. Process Actuals, Pax, and Venues
+                let realData = new Array(12).fill(0); 
+                let count = 0, annualNett = 0, totalPax = 0;
+                let venueMap = {};
+
                 for(let i=26; i<=87; i++) {
                     const r = rows[i]; if(!r || !r[9] || !r[14]) continue;
                     const sStat = (r[13]||'').toUpperCase();
+                    
                     if(sStat.includes("CONFIRM") || sStat.includes("DONE")) {
                         const nett = cleanVal(r[14]) / 1.21;
+                        const pax = cleanVal(r[11]);
+                        const venue = (r[15] || 'TBD').toUpperCase().trim();
                         const m = parseInt(r[9].split('/')[1]);
-                        if(m >= 1 && m <= 12) { realData[m-1] += nett; count++; annualNett += nett; }
+
+                        if(m >= 1 && m <= 12) { 
+                            realData[m-1] += nett; 
+                            count++; 
+                            annualNett += nett;
+                            totalPax += pax;
+                            if(venue) venueMap[venue] = (venueMap[venue] || 0) + 1;
+                        }
                     }
                 }
 
+                // 3. Update Text Statistics
                 const achData = realData.map((val, i) => budgetData[i] > 0 ? Math.round((val / budgetData[i]) * 100) : 0);
-                let totalAch = 0, active = 0;
-                achData.forEach((v, i) => { if(realData[i] > 0 || budgetData[i] > 0) { totalAch += v; active++; } });
+                let totalAch = 0, activeMonths = 0;
+                achData.forEach((v, i) => { if(realData[i] > 0 || budgetData[i] > 0) { totalAch += v; activeMonths++; } });
                 
                 document.getElementById('annual-progress').innerText = (totalBudgetSetahun > 0 ? Math.round((annualNett / totalBudgetSetahun) * 100) : 0) + "%";
-                document.getElementById('avg-ach').innerText = Math.round(totalAch / (active || 1)) + "%";
+                document.getElementById('avg-ach').innerText = Math.round(totalAch / (activeMonths || 1)) + "%";
                 document.getElementById('total-event-count').innerText = count;
+                document.getElementById('total-pax-count').innerText = totalPax.toLocaleString('id-ID');
                 document.getElementById('total-annual').innerText = "Rp" + Math.round(annualNett).toLocaleString('id-ID');
+
+                // 4. Render Venue Breakdown List
+                const venueContainer = document.getElementById('venue-list');
+                let venueHtml = '';
+                Object.entries(venueMap).sort((a,b) => b[1] - a[1]).forEach(([name, val]) => {
+                    venueHtml += `
+                        <div class="bg-white/5 border border-white/10 rounded-xl p-2.5 flex justify-between items-center">
+                            <span class="text-[9px] font-bold text-slate-300 truncate pr-2 tracking-tight">${name}</span>
+                            <span class="text-[11px] font-black text-indigo-400">${val}<span class="text-[7px] ml-0.5 opacity-60 italic">×</span></span>
+                        </div>`;
+                });
+                venueContainer.innerHTML = venueHtml || '<p class="col-span-2 text-center text-[10px] py-4 opacity-20 italic">No Venue Data Available</p>';
+
                 renderChart(realData, budgetData, achData);
             } catch (e) { console.error(e); }
         }
