@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Banquet Dashboard 2026 - V.6.3</title>
+    <title>Banquet Dashboard 2026 - V.6.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
@@ -27,11 +27,11 @@
     <div class="flex justify-between items-center px-1 flex-none">
         <div>
             <h1 class="text-[12px] font-black italic uppercase text-indigo-400">Banquet Dashboard</h1>
-            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase">Kediri V.6.3</p>
+            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase">Kediri V.6.4</p>
         </div>
         <div class="flex gap-2">
             <button onclick="toggleNightMode()" id="night-btn" class="bg-slate-800 text-[12px] p-2 rounded-lg border border-slate-700">🌙</button>
-            <a href="graphics.html" class="bg-indigo-500/20 text-indigo-400 px-2 py-1.5 rounded-full text-[8px] font-black border border-indigo-500/30">ANALYTICS →</a>
+            <button onclick="window.location.href='graphics.html'" class="bg-indigo-500/20 text-indigo-400 px-2 py-1.5 rounded-full text-[8px] font-black border border-indigo-500/30">ANALYTICS →</button>
         </div>
     </div>
 
@@ -75,9 +75,22 @@
 
     <div class="card-base flex-1 flex flex-col overflow-hidden min-h-0">
         <div id="event-container" class="space-y-2 no-scrollbar pt-1"></div>
-        <div class="mt-1.5 pt-1.5 border-t border-white/10 grid grid-cols-2 flex-none">
-            <div class="text-center"><p class="text-[7px] font-bold text-slate-500 uppercase">Gross On-List</p><p id="daily-gross" class="text-[12px] font-black">Rp0</p></div>
-            <div class="text-center border-l border-white/10"><p class="text-[7px] font-bold text-indigo-400 uppercase">Nett On-List</p><p id="daily-nett" class="text-[12px] font-black text-indigo-300">Rp0</p></div>
+        
+        <div class="mt-1.5 pt-1.5 border-t border-white/10 flex flex-col gap-1 flex-none">
+            <div class="grid grid-cols-2 divide-x divide-white/10">
+                <div class="text-center">
+                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none">Total Pax On-List</p>
+                    <p id="daily-pax" class="text-[11px] font-black text-amber-400">0</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none">Total Event</p>
+                    <p id="daily-count" class="text-[11px] font-black text-slate-200">0</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 border-t border-white/5 pt-1">
+                <div class="text-center"><p class="text-[7px] font-bold text-slate-500 uppercase">Gross On-List</p><p id="daily-gross" class="text-[12px] font-black">Rp0</p></div>
+                <div class="text-center border-l border-white/10"><p class="text-[7px] font-bold text-indigo-400 uppercase">Nett On-List</p><p id="daily-nett" class="text-[12px] font-black text-indigo-300">Rp0</p></div>
+            </div>
         </div>
     </div>
 
@@ -127,28 +140,28 @@
                     cachedRows = data.values || [];
                 }
                 
-                let html = ''; let listCount = 0; let listGross = 0;
+                let html = ''; let listCount = 0; let listGross = 0; let listPax = 0;
                 let mtdNett = 0; let tBud = 0;
 
-                // 1. HITUNG PERFORMANCE (CONFIRM/DONE ONLY) - LOOP SELURUH DATA RANGE EVENT
                 for (let i = 26; i <= 87; i++) {
                     const r = cachedRows[i]; if (!r || !r[9] || !r[14]) continue;
                     const gVal = cleanVal(r[14]);
+                    const pVal = cleanVal(r[11]);
                     const sStat = (r[13]||'').toUpperCase();
                     const [dP, mP] = r[9].split('/');
                     
-                    // PERFORMANCE: Hanya hitung CONFIRM/DONE sesuai bulan terpilih
+                    // PERFORMANCE CALCULATION (MTD)
                     if (monthVal === "ALL" || parseInt(mP) === parseInt(monthVal)) {
                         if (sStat.includes("CONFIRM") || sStat.includes("DONE")) {
                             mtdNett += (gVal / 1.21);
                         }
                     }
 
-                    // 2. FILTERING UNTUK LIST EVENT DI LAYAR
+                    // LIST FILTERING
                     let mTime = (search.length >= 1) ? true : (dateVal ? (parseInt(dP)==parseInt(dateVal.split('-')[2]) && parseInt(mP)==parseInt(dateVal.split('-')[1])) : (monthVal !== "ALL" ? parseInt(mP) === parseInt(monthVal) : true));
                     
                     if (mTime && (search==="" || r[10].toLowerCase().includes(search)) && (currentStatusFilter==='ALL' || sStat.includes(currentStatusFilter)) && (!isHighValueMode || gVal >= 10000000)) {
-                        listCount++; listGross += gVal;
+                        listCount++; listGross += gVal; listPax += pVal;
                         let isTentative = sStat.includes("TENTATIVE");
                         let cCol = sStat.includes("CONFIRM") ? 'text-emerald-400 bg-emerald-500/20' : (sStat.includes("DONE") ? 'text-indigo-300 bg-indigo-500/30' : (isTentative ? 'text-amber-400 bg-amber-500/20' : 'text-slate-400 bg-slate-500/10'));
                         let fuLabel = isTentative ? `<div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0"><span class="bg-amber-500 text-black text-[7px] font-black px-3 py-1 rounded-full animate-pulse border border-amber-300 shadow-xl">FOLLOW UP</span></div>` : '';
@@ -169,7 +182,7 @@
                     }
                 }
 
-                // 3. AMBIL DATA BUDGET
+                // BUDGET FETCHING
                 if (monthVal !== "ALL") {
                     tBud = cleanVal(cachedRows[88 + (parseInt(monthVal) - 1)]?.[1]);
                     document.getElementById('mtd-label').innerText = document.getElementById('month-select').options[document.getElementById('month-select').selectedIndex].text.toUpperCase() + " PERFORMANCE";
@@ -178,14 +191,19 @@
                     document.getElementById('mtd-label').innerText = "ANNUAL PERFORMANCE";
                 }
 
-                // 4. UPDATE UI
+                // UI UPDATE
                 const gap = mtdNett - tBud;
                 const ach = tBud > 0 ? Math.round((mtdNett / tBud) * 100) : 0;
 
                 container.innerHTML = listCount > 0 ? html : `<div class="py-10 opacity-20 text-center text-[10px] font-black italic uppercase">No Event Data</div>`;
+                
+                // Update Summary List Section
+                document.getElementById('daily-pax').innerText = listPax.toLocaleString('id-ID');
+                document.getElementById('daily-count').innerText = listCount;
                 document.getElementById('daily-gross').innerText = formatRp(listGross);
                 document.getElementById('daily-nett').innerText = formatRp(listGross / 1.21);
                 
+                // Update Main Performance Footer
                 document.getElementById('mtd-onhand').innerText = formatRp(mtdNett);
                 document.getElementById('mtd-ach').innerText = ach + "%";
                 document.getElementById('progress-bar').style.width = Math.min(ach, 100) + "%";
@@ -199,8 +217,6 @@
         async function refreshData() {
             const btn = document.getElementById('btn-refresh');
             btn.classList.add('animate-spin');
-            
-            // RESET SESUAI REQUEST
             document.getElementById('customer-search').value = "";
             let n = new Date();
             document.getElementById('date-input').value = new Date(n.getTime() - (n.getTimezoneOffset()*60000)).toISOString().split('T')[0];
@@ -208,7 +224,6 @@
             currentStatusFilter = 'ALL';
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('btn-ALL').classList.add('active');
-            
             cachedRows = []; 
             await updateDashboard();
             setTimeout(() => btn.classList.remove('animate-spin'), 600);
