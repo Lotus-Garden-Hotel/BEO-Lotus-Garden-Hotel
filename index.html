@@ -47,7 +47,7 @@
             </select>
             <button onclick="changeMonth(1)" class="nav-arrow">›</button>
         </div>
-        <div class="card-base py-1.5"><input type="text" id="customer-search" class="search-input uppercase" placeholder="CARI NAMA..." oninput="updateDashboard()"></div>
+        <div class="card-base py-1.5"><input type="text" id="customer-search" class="search-input uppercase" placeholder="CARI NAMA / VENUE..." oninput="updateDashboard()"></div>
     </div>
 
     <div class="card-base py-1.5 flex items-center justify-between px-2 flex-none">
@@ -118,7 +118,19 @@
         window.onload = () => {
             const savedMode = localStorage.getItem('nightMode');
             if (savedMode === 'enabled') document.body.classList.add('night-mode');
-            setToday();
+
+            // LOGIKA DEEP LINK DARI GRAPHICS
+            const urlParams = new URLSearchParams(window.location.search);
+            const venueParam = urlParams.get('venue');
+
+            if (venueParam) {
+                document.getElementById('month-select').value = "ALL";
+                document.getElementById('date-input').value = "";
+                document.getElementById('customer-search').value = venueParam;
+                updateDashboard();
+            } else {
+                setToday();
+            }
         };
 
         function toggleNightMode() {
@@ -148,19 +160,19 @@
                     const gVal = cleanVal(r[14]);
                     const pVal = cleanVal(r[11]);
                     const sStat = (r[13]||'').toUpperCase();
+                    const vName = (r[15]||'').toLowerCase(); // Ambil Nama Venue
                     const [dP, mP] = r[9].split('/');
                     
-                    // PERFORMANCE CALCULATION (MTD)
                     if (monthVal === "ALL" || parseInt(mP) === parseInt(monthVal)) {
                         if (sStat.includes("CONFIRM") || sStat.includes("DONE")) {
                             mtdNett += (gVal / 1.21);
                         }
                     }
 
-                    // LIST FILTERING
                     let mTime = (search.length >= 1) ? true : (dateVal ? (parseInt(dP)==parseInt(dateVal.split('-')[2]) && parseInt(mP)==parseInt(dateVal.split('-')[1])) : (monthVal !== "ALL" ? parseInt(mP) === parseInt(monthVal) : true));
                     
-                    if (mTime && (search==="" || r[10].toLowerCase().includes(search)) && (currentStatusFilter==='ALL' || sStat.includes(currentStatusFilter)) && (!isHighValueMode || gVal >= 10000000)) {
+                    // PENYESUAIAN FILTER: Cek Nama Customer r[10] ATAU Nama Venue r[15]
+                    if (mTime && (search==="" || r[10].toLowerCase().includes(search) || vName.includes(search)) && (currentStatusFilter==='ALL' || sStat.includes(currentStatusFilter)) && (!isHighValueMode || gVal >= 10000000)) {
                         listCount++; listGross += gVal; listPax += pVal;
                         let isTentative = sStat.includes("TENTATIVE");
                         let cCol = sStat.includes("CONFIRM") ? 'text-emerald-400 bg-emerald-500/20' : (sStat.includes("DONE") ? 'text-indigo-300 bg-indigo-500/30' : (isTentative ? 'text-amber-400 bg-amber-500/20' : 'text-slate-400 bg-slate-500/10'));
@@ -182,7 +194,6 @@
                     }
                 }
 
-                // BUDGET FETCHING
                 if (monthVal !== "ALL") {
                     tBud = cleanVal(cachedRows[88 + (parseInt(monthVal) - 1)]?.[1]);
                     document.getElementById('mtd-label').innerText = document.getElementById('month-select').options[document.getElementById('month-select').selectedIndex].text.toUpperCase() + " PERFORMANCE";
@@ -191,26 +202,19 @@
                     document.getElementById('mtd-label').innerText = "ANNUAL PERFORMANCE";
                 }
 
-                // UI UPDATE
                 const gap = mtdNett - tBud;
                 const ach = tBud > 0 ? Math.round((mtdNett / tBud) * 100) : 0;
-
                 container.innerHTML = listCount > 0 ? html : `<div class="py-10 opacity-20 text-center text-[10px] font-black italic uppercase">No Event Data</div>`;
-                
-                // Update Summary List Section
                 document.getElementById('daily-pax').innerText = listPax.toLocaleString('id-ID');
                 document.getElementById('daily-count').innerText = listCount;
                 document.getElementById('daily-gross').innerText = formatRp(listGross);
                 document.getElementById('daily-nett').innerText = formatRp(listGross / 1.21);
-                
-                // Update Main Performance Footer
                 document.getElementById('mtd-onhand').innerText = formatRp(mtdNett);
                 document.getElementById('mtd-ach').innerText = ach + "%";
                 document.getElementById('progress-bar').style.width = Math.min(ach, 100) + "%";
                 document.getElementById('mtd-budget').innerText = formatRp(tBud);
                 document.getElementById('mtd-gap').innerText = formatRp(gap);
                 document.getElementById('mtd-gap').className = `text-[11px] font-black ${gap < 0 ? 'text-rose-500' : 'text-emerald-400'}`;
-
             } catch (e) { console.error("Update Error:", e); }
         }
 
