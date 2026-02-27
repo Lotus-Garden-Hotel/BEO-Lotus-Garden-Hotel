@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Banquet Dashboard 2026 - V.5.4</title>
-	<link rel="icon" type="image/png" href="favicon.ico">
+    <title>Banquet Dashboard 2026 - V.5.5</title>
+	 <link rel="icon" type="image/png" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
@@ -15,7 +15,7 @@
         select, .search-input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 12px; appearance: none; }
         .filter-btn { padding: 4px 10px; border-radius: 99px; font-size: 8px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; white-space: nowrap; }
         .filter-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
-        .action-btn { background: rgba(255,255,255,0.1); color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 11px; border: 1px solid rgba(255,255,255,0.1); }
+        .action-btn { background: rgba(255,255,255,0.1); color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 11px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
         @keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .tentative-glow { border: 1.5px solid #f59e0b !important; box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.1); }
@@ -28,7 +28,7 @@
     <div class="flex justify-between items-center px-1 flex-none">
         <div>
             <h1 class="text-[12px] font-black italic uppercase leading-none text-indigo-400">Banquet Dashboard</h1>
-            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase">Kediri V.5.4</p>
+            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase">Kediri V.5.5</p>
         </div>
         <a href="graphics.html" class="bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full text-[8px] font-black uppercase border border-indigo-500/30">Analytics →</a>
     </div>
@@ -77,7 +77,7 @@
 
     <div class="card-base flex-1 flex flex-col overflow-hidden min-h-0">
         <div class="flex justify-between items-center border-b border-white/10 pb-1 mb-1.5">
-            <p id="list-title" class="text-[8px] font-black uppercase text-indigo-400 italic">LOADING...</p>
+            <p id="list-title" class="text-[8px] font-black uppercase text-indigo-400 italic">READY</p>
             <span id="event-count" class="bg-indigo-500 text-white text-[8px] px-2 py-0.5 rounded-full font-black">0</span>
         </div>
         
@@ -91,7 +91,7 @@
 
     <div class="flex-none space-y-1">
         <div id="mtd-card" class="card-base bg-gradient-to-br from-indigo-900/40 to-slate-900/60 py-2 text-center">
-            <p id="mtd-label" class="text-[8px] font-black uppercase text-indigo-200 mb-0.5">MTD PERFORMANCE</p>
+            <p id="mtd-label" class="text-[8px] font-black uppercase text-indigo-200 mb-0.5 tracking-widest">PERFORMANCE</p>
             <h2 id="mtd-onhand" class="text-xl font-black tracking-tighter">Rp0</h2>
             <div class="flex items-center gap-2 px-4 mt-1">
                 <div class="bg-white/10 h-1 flex-1 rounded-full overflow-hidden">
@@ -139,24 +139,26 @@
             const btn = document.getElementById('btn-refresh');
             btn.style.animation = "spin 1s linear infinite";
             document.getElementById('customer-search').value = "";
-            currentStatusFilter = 'ALL';
-            isHighValueMode = false;
-            isGlobalTentative = false;
             cachedRows = [];
             setToday(); 
             await updateDashboard();
             setTimeout(() => btn.style.animation = "none", 800);
         }
 
+        // BUG FIX: Unclick lonceng pindah ke ALL
         function filterAllTentative() {
             isGlobalTentative = !isGlobalTentative;
-            document.getElementById('btn-tent-all').style.background = isGlobalTentative ? '#f59e0b44' : 'rgba(255,255,255,0.1)';
+            const btn = document.getElementById('btn-tent-all');
+            
             if(isGlobalTentative) {
+                btn.style.background = '#f59e0b44';
                 document.getElementById('month-select').value = "ALL";
                 document.getElementById('date-input').value = "";
                 setStatusFilter('TENTATIVE');
             } else {
+                btn.style.background = 'rgba(255,255,255,0.1)';
                 setToday();
+                setStatusFilter('ALL'); // RESET KE ALL STATUS SAAT UNCLICK
             }
         }
 
@@ -216,10 +218,13 @@
                     const sDate = r[9], sName = r[10], sStat = (r[13]||'').toUpperCase(), sVen = (r[15]||'').toUpperCase();
                     const [dP, mP] = sDate.split('/');
 
-                    if (monthVal === "ALL" || parseInt(mP) === parseInt(monthVal)) mtdNett += (gVal / 1.21);
+                    // PERFORMANCE LOGIC: Always sync with selected Month
+                    if (monthVal === "ALL" || parseInt(mP) === parseInt(monthVal)) {
+                        mtdNett += (gVal / 1.21);
+                    }
 
                     let mTime = false;
-                    if (search.length >= 1) { mTime = true; } // GLOBAL SEARCH AKTIF
+                    if (search.length >= 1) { mTime = true; } 
                     else if (dateVal) {
                         const [y, m, d] = dateVal.split('-');
                         mTime = (parseInt(dP)==parseInt(d) && parseInt(mP)==parseInt(m));
@@ -253,9 +258,16 @@
                     }
                 }
 
+                // BUDGET CALCULATION BASED ON MONTH
                 let tBud = 0;
-                if (monthVal !== "ALL") tBud = cleanVal(cachedRows[88 + (parseInt(monthVal) - 1)]?.[1]);
-                else { for (let j = 88; j <= 99; j++) tBud += cleanVal(cachedRows[j]?.[1]); }
+                if (monthVal !== "ALL") {
+                    tBud = cleanVal(cachedRows[88 + (parseInt(monthVal) - 1)]?.[1]);
+                    document.getElementById('mtd-label').innerText = document.getElementById('month-select').options[document.getElementById('month-select').selectedIndex].text.toUpperCase() + " PERFORMANCE";
+                } else { 
+                    for (let j = 88; j <= 99; j++) tBud += cleanVal(cachedRows[j]?.[1]); 
+                    document.getElementById('mtd-label').innerText = "ANNUAL PERFORMANCE";
+                }
+
                 const gap = mtdNett - tBud;
                 const ach = tBud > 0 ? Math.round((mtdNett / tBud) * 100) : 0;
 
@@ -264,6 +276,8 @@
                 document.getElementById('event-count').innerText = count;
                 document.getElementById('daily-gross').innerText = formatRp(gSum);
                 document.getElementById('daily-nett').innerText = formatRp(gSum / 1.21);
+                
+                // PERFORMANCE UPDATE
                 document.getElementById('mtd-onhand').innerText = formatRp(mtdNett);
                 document.getElementById('mtd-ach').innerText = ach + "%";
                 document.getElementById('progress-bar').style.width = Math.min(ach, 100) + "%";
