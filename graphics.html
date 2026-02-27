@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banquet Analytics - V.5.8</title>
+    <title>Banquet Analytics - V.6.0</title>
     <link rel="icon" type="image/png" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,46 +12,51 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         :root { --bg: #020617; --card: rgba(255, 255, 255, 0.05); }
         body.night-mode { --bg: #000000 !important; --card: rgba(15, 23, 42, 0.8) !important; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #f8fafc; padding: 15px; transition: background 0.3s ease; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #f8fafc; padding: 15px; transition: 0.3s; min-height: 100vh; }
         .card-base { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 15px; transition: 0.3s; }
-        #status-tag { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-4">
-            <a href="index.html" class="bg-white/10 px-3 py-1.5 rounded-xl text-indigo-400 font-bold text-xs border border-white/5 shadow-lg">← DASHBOARD</a>
-            <h1 class="text-xl font-black uppercase italic text-white tracking-tighter">Analytics <span class="text-indigo-500">2026</span></h1>
+            <a href="index.html" class="bg-white/10 px-3 py-1.5 rounded-xl text-indigo-400 font-bold text-xs border border-white/5">← DASHBOARD</a>
+            <h1 class="text-xl font-black uppercase italic">Analytics <span class="text-indigo-500 text-[10px] not-italic">V.6.0</span></h1>
         </div>
-        <div id="status-tag" class="text-[8px] font-black bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full border border-indigo-500/30 italic">SYNCING...</div>
+        <div id="status-tag" class="text-[8px] font-black bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full border border-indigo-500/30">SYNCED</div>
     </div>
 
     <div class="space-y-4">
         <div class="card-base">
-            <div class="flex justify-between items-end mb-6">
+            <div class="flex justify-between items-start mb-6">
                 <div>
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Monthly Achievement</p>
-                    <h2 class="text-xs font-bold text-indigo-300">Revenue Nett vs Budget</h2>
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">Revenue Performance</p>
+                    <h2 class="text-xs font-bold text-indigo-300">Monthly Achievement (%)</h2>
                 </div>
                 <div class="text-right">
                     <p id="total-annual" class="text-[12px] font-black text-emerald-400">Rp0</p>
-                    <p class="text-[7px] font-bold text-slate-500 uppercase">Annual Nett Total</p>
+                    <p class="text-[7px] font-bold text-slate-500 uppercase">Current Annual Nett</p>
                 </div>
             </div>
-            <div class="relative h-[380px]">
+            <div class="relative h-[300px]">
                 <canvas id="revenueChart"></canvas>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-            <div class="card-base text-center border-b-2 border-indigo-500">
-                <p class="text-[8px] font-black text-slate-500 uppercase mb-1">Avg. Achievement</p>
-                <h2 id="avg-ach" class="text-2xl font-black text-indigo-400">0%</h2>
+        <div class="grid grid-cols-3 gap-2">
+            <div class="card-base text-center border-b-2 border-emerald-500 px-1">
+                <p class="text-[7px] font-black text-slate-500 uppercase mb-1">Annual Progress</p>
+                <h2 id="annual-progress" class="text-lg font-black text-emerald-400">0%</h2>
+                <p class="text-[6px] text-slate-500 leading-none">Target Jan-Dec</p>
             </div>
-            <div class="card-base text-center border-b-2 border-slate-700">
-                <p class="text-[8px] font-black text-slate-500 uppercase mb-1">Total Event Count</p>
-                <h2 id="total-event-count" class="text-2xl font-black text-white">0</h2>
+            <div class="card-base text-center border-b-2 border-indigo-500 px-1">
+                <p class="text-[7px] font-black text-slate-500 uppercase mb-1">Monthly Avg</p>
+                <h2 id="avg-ach" class="text-lg font-black text-indigo-400">0%</h2>
+                <p class="text-[6px] text-slate-500 leading-none">Efficiency Rate</p>
+            </div>
+            <div class="card-base text-center border-b-2 border-slate-700 px-1">
+                <p class="text-[7px] font-black text-slate-500 uppercase mb-1">Total Events</p>
+                <h2 id="total-event-count" class="text-lg font-black text-white">0</h2>
+                <p class="text-[6px] text-slate-500 leading-none">Confirmed</p>
             </div>
         </div>
     </div>
@@ -65,10 +70,7 @@
 
         window.onload = () => {
             const savedMode = localStorage.getItem('nightMode');
-            if (savedMode === 'enabled') {
-                document.body.classList.add('night-mode');
-            }
-            // Delay tipis biar CSS render dulu
+            if (savedMode === 'enabled') document.body.classList.add('night-mode');
             setTimeout(fetchData, 50);
         };
 
@@ -78,77 +80,68 @@
                 const data = await res.json();
                 const rows = data.values;
 
-                // 1. Ambil Budget (Baris 89-100 -> Index 88-99)
+                // 1. Ambil Budget (Index 88-99)
                 let budgetData = [];
+                let totalBudgetSetahun = 0;
                 for(let i=88; i<=99; i++) {
-                    budgetData.push(cleanVal(rows[i]?.[1]));
+                    const bVal = cleanVal(rows[i]?.[1]);
+                    budgetData.push(bVal);
+                    totalBudgetSetahun += bVal;
                 }
 
-                // 2. Ambil Realisasi (Baris 27-88 -> Index 26-87)
+                // 2. Ambil Realisasi (Baris 27-88)
                 let realData = new Array(12).fill(0);
-                let eventCounter = 0;
-                let annualTotalNett = 0;
+                let count = 0, annualNett = 0;
 
                 for(let i=26; i<=87; i++) {
                     const r = rows[i];
                     if(!r || !r[9] || !r[14]) continue;
-                    
                     const nett = cleanVal(r[14]) / 1.21;
-                    const parts = r[9].split('/');
-                    const monthIndex = parseInt(parts[1]) - 1;
-                    
-                    if(monthIndex >= 0 && monthIndex < 12) {
-                        realData[monthIndex] += nett;
-                        eventCounter++;
-                        annualTotalNett += nett;
+                    const m = parseInt(r[9].split('/')[1]);
+                    if(m >= 1 && m <= 12) {
+                        realData[m-1] += nett;
+                        count++;
+                        annualNett += nett;
                     }
                 }
 
-                // 3. Hitung Persentase
+                // 3. Kalkulasi 2 Jenis Persentase
+                // A. Persentase Bulanan (untuk rata-rata)
                 const achData = realData.map((val, i) => budgetData[i] > 0 ? Math.round((val / budgetData[i]) * 100) : 0);
+                let totalAch = 0, active = 0;
+                achData.forEach((v, i) => { if(realData[i] > 0 || budgetData[i] > 0) { totalAch += v; active++; } });
+                const monthlyAvg = Math.round(totalAch / (active || 1));
 
-                let totalAch = 0, activeMonths = 0;
-                achData.forEach((v, i) => {
-                    if(realData[i] > 0 || budgetData[i] > 0) {
-                        totalAch += v;
-                        activeMonths++;
-                    }
-                });
+                // B. Annual Progress (SAMAKAN DENGAN DASHBOARD)
+                const annualProgress = totalBudgetSetahun > 0 ? Math.round((annualNett / totalBudgetSetahun) * 100) : 0;
 
                 // 4. Update UI
-                document.getElementById('avg-ach').innerText = Math.round(totalAch / (activeMonths || 1)) + "%";
-                document.getElementById('total-event-count').innerText = eventCounter;
-                document.getElementById('total-annual').innerText = "Rp" + Math.round(annualTotalNett).toLocaleString('id-ID');
-                document.getElementById('status-tag').innerText = "LIVE DATA MATCHED";
-                document.getElementById('status-tag').classList.remove('bg-indigo-500/20');
-                document.getElementById('status-tag').classList.add('bg-emerald-500/20', 'text-emerald-400');
+                document.getElementById('annual-progress').innerText = annualProgress + "%";
+                document.getElementById('avg-ach').innerText = monthlyAvg + "%";
+                document.getElementById('total-event-count').innerText = count;
+                document.getElementById('total-annual').innerText = "Rp" + Math.round(annualNett).toLocaleString('id-ID');
 
                 renderChart(realData, budgetData, achData);
-            } catch (e) {
-                console.error(e);
-                document.getElementById('status-tag').innerText = "SYNC ERROR";
-            }
+            } catch (e) { console.error(e); }
         }
 
         function renderChart(real, bud, ach) {
             const isNight = document.body.classList.contains('night-mode');
             const ctx = document.getElementById('revenueChart').getContext('2d');
-
             new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGU', 'SEP', 'OKT', 'NOV', 'DES'],
                     datasets: [
                         {
-                            label: 'Actual Nett',
+                            label: 'Actual',
                             data: real,
                             backgroundColor: '#6366f1',
-                            borderRadius: 6,
+                            borderRadius: 4,
                             datalabels: {
-                                anchor: 'end',
-                                align: 'top',
+                                anchor: 'end', align: 'top',
                                 color: isNight ? '#818cf8' : '#4f46e5',
-                                font: { weight: '900', size: 10 },
+                                font: { weight: '900', size: 9 },
                                 formatter: (val, ctx) => ach[ctx.dataIndex] + '%'
                             }
                         },
@@ -156,58 +149,26 @@
                             label: 'Budget',
                             data: bud,
                             backgroundColor: isNight ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-                            borderRadius: 6,
+                            borderRadius: 4,
                             datalabels: { display: false }
                         }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: { padding: { top: 30 } },
+                    responsive: true, maintainAspectRatio: false,
                     scales: {
-                        y: { 
-                            beginAtZero: true,
-                            grid: { color: isNight ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', drawBorder: false },
-                            ticks: { 
-                                color: '#64748b', 
-                                font: { size: 9 },
-                                callback: (v) => 'Rp' + (v/1000000) + 'M'
-                            }
-                        },
-                        x: { 
-                            grid: { display: false },
-                            ticks: { color: '#64748b', font: { size: 9, weight: '800' } }
-                        }
+                        y: { beginAtZero: true, grid: { display: false }, ticks: { display: false } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 8, weight: '700' } } }
                     },
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: isNight ? '#f8fafc' : '#1e293b',
-                                font: { size: 10, weight: '700' },
-                                usePointStyle: true,
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: isNight ? '#1e1b4b' : '#ffffff',
-                            titleColor: isNight ? '#ffffff' : '#1e1b4b',
-                            bodyColor: isNight ? '#ffffff' : '#1e1b4b',
-                            borderColor: 'rgba(99,102,241,0.3)',
-                            borderWidth: 1,
-                            callbacks: {
-                                label: (ctx) => ' ' + ctx.dataset.label + ': Rp' + Math.round(ctx.raw).toLocaleString('id-ID')
-                            }
-                        }
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { color: isNight ? '#f8fafc' : '#1e293b', font: { size: 9 }, usePointStyle: true } },
+                        tooltip: { enabled: true }
                     }
                 }
             });
         }
 
-        function cleanVal(s) {
-            return parseFloat((s || "0").toString().replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
-        }
+        function cleanVal(s) { return parseFloat((s || "0").toString().replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0; }
     </script>
 </body>
 </html>
