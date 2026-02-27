@@ -87,7 +87,6 @@
                 const data = await res.json();
                 const rows = data.values;
                 
-                // 1. Process Budget
                 let budgetData = []; let totalBudgetSetahun = 0;
                 for(let i=88; i<=99; i++) { 
                     const bVal = cleanVal(rows[i]?.[1]); 
@@ -95,7 +94,6 @@
                     totalBudgetSetahun += bVal; 
                 }
                 
-                // 2. Process Actuals, Pax, and Venues
                 let realData = new Array(12).fill(0); 
                 let count = 0, annualNett = 0, totalPax = 0;
                 let venueMap = {};
@@ -120,7 +118,6 @@
                     }
                 }
 
-                // 3. Update Text Statistics
                 const achData = realData.map((val, i) => budgetData[i] > 0 ? Math.round((val / budgetData[i]) * 100) : 0);
                 let totalAch = 0, activeMonths = 0;
                 achData.forEach((v, i) => { if(realData[i] > 0 || budgetData[i] > 0) { totalAch += v; activeMonths++; } });
@@ -131,15 +128,15 @@
                 document.getElementById('total-pax-count').innerText = totalPax.toLocaleString('id-ID');
                 document.getElementById('total-annual').innerText = "Rp" + Math.round(annualNett).toLocaleString('id-ID');
 
-                // 4. Render Venue Breakdown List
+                // RENDER VENUE DENGAN LINK KE INDEX.HTML
                 const venueContainer = document.getElementById('venue-list');
                 let venueHtml = '';
                 Object.entries(venueMap).sort((a,b) => b[1] - a[1]).forEach(([name, val]) => {
                     venueHtml += `
-                        <div class="bg-white/5 border border-white/10 rounded-xl p-2.5 flex justify-between items-center">
+                        <a href="index.html?venue=${encodeURIComponent(name)}" class="bg-white/5 border border-white/10 rounded-xl p-2.5 flex justify-between items-center hover:bg-indigo-500/10 transition-all cursor-pointer">
                             <span class="text-[9px] font-bold text-slate-300 truncate pr-2 tracking-tight">${name}</span>
                             <span class="text-[11px] font-black text-indigo-400">${val}<span class="text-[7px] ml-0.5 opacity-60 italic">×</span></span>
-                        </div>`;
+                        </a>`;
                 });
                 venueContainer.innerHTML = venueHtml || '<p class="col-span-2 text-center text-[10px] py-4 opacity-20 italic">No Venue Data Available</p>';
 
