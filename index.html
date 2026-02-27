@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Banquet Dashboard 2026 - Ultimate Master</title>
-    <link rel="icon" type="image/png" href="favicon.ico">
+    <title>Banquet Dashboard 2026 - V.5.4</title>
+	<link rel="icon" type="image/png" href="favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         :root { --bg-deep: #020617; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep); color: #f8fafc; padding: 10px; margin: 0; box-sizing: border-box; display: flex; flex-direction: column; height: 100dvh; gap: 8px; overflow: hidden; }
-        .card-base { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 1.25rem; padding: 10px; }
-        .nav-arrow { background: rgba(255,255,255,0.08); color: white; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; font-size: 14px; }
-        #date-input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 110px; text-align: center; font-size: 12px; appearance: none; -webkit-appearance: none; }
-        select, .search-input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 13px; appearance: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep); color: #f8fafc; padding: 8px; margin: 0; box-sizing: border-box; display: flex; flex-direction: column; height: 100dvh; gap: 6px; overflow: hidden; }
+        .card-base { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 1rem; padding: 8px; transition: 0.3s; position: relative; }
+        .nav-arrow { background: rgba(255,255,255,0.08); color: white; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; font-size: 14px; border: 1px solid var(--glass-border); }
+        select, .search-input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 12px; appearance: none; }
         .filter-btn { padding: 4px 10px; border-radius: 99px; font-size: 8px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; white-space: nowrap; }
         .filter-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
-        .action-btn { background: rgba(255,255,255,0.1); color: white; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; border: 1px solid rgba(255,255,255,0.1); transition: 0.2s; }
+        .action-btn { background: rgba(255,255,255,0.1); color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 11px; border: 1px solid rgba(255,255,255,0.1); }
+        @keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        #event-container { overflow-y: auto; scrollbar-width: none; }
+        .tentative-glow { border: 1.5px solid #f59e0b !important; box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.1); }
+        #event-container { overflow-y: auto; scrollbar-width: none; flex: 1; min-height: 0; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -26,15 +27,15 @@
 
     <div class="flex justify-between items-center px-1 flex-none">
         <div>
-            <h1 class="text-sm font-black italic tracking-tighter uppercase leading-none text-indigo-400">Banquet Dashboard</h1>
-            <p class="text-[7px] font-bold text-slate-500 tracking-[0.2em]">KEDIRI - 2026</p>
+            <h1 class="text-[12px] font-black italic uppercase leading-none text-indigo-400">Banquet Dashboard</h1>
+            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase">Kediri V.5.4</p>
         </div>
-        <a href="graphics.html" class="bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full text-[9px] font-black uppercase border border-indigo-500/30">Analytics View →</a>
+        <a href="graphics.html" class="bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full text-[8px] font-black uppercase border border-indigo-500/30">Analytics →</a>
     </div>
 
     <div class="grid grid-cols-2 gap-2 flex-none">
-        <div class="card-base py-2 flex flex-col items-center">
-            <div class="flex items-center gap-2 w-full px-1">
+        <div class="card-base py-1.5 flex items-center">
+            <div class="flex items-center gap-1 w-full px-1">
                 <button onclick="changeMonth(-1)" class="nav-arrow">‹</button>
                 <select id="month-select" onchange="resetDateOnly()" class="flex-1">
                     <option value="ALL">-- SEMUA --</option>
@@ -46,67 +47,70 @@
                 <button onclick="changeMonth(1)" class="nav-arrow">›</button>
             </div>
         </div>
-        <div class="card-base py-2 flex items-center">
-            <input type="text" id="customer-search" class="search-input" placeholder="CARI PELANGGAN..." oninput="updateDashboard()">
+        <div class="card-base py-1.5">
+            <input type="text" id="customer-search" class="search-input uppercase" placeholder="CARI NAMA..." oninput="updateDashboard()">
         </div>
     </div>
 
-    <div class="card-base py-1.5 flex items-center justify-between gap-1 flex-none px-2">
-        <button onclick="resetDateOnly()" class="text-[8px] font-black text-slate-500 px-2 uppercase">Reset</button>
-        <div class="flex items-center gap-1 flex-1 justify-center">
-            <button onclick="changeDate(-1)" class="nav-arrow">‹</button>
-            <input type="date" id="date-input" onchange="syncMonthFromDate()">
-            <button onclick="changeDate(1)" class="nav-arrow">›</button>
+    <div class="card-base py-1.5 flex items-center justify-between flex-none px-2">
+        <button onclick="changeDate(-1)" class="nav-arrow">‹</button>
+        <div class="flex flex-col items-center">
+            <input type="date" id="date-input" onchange="syncMonthFromDate()" class="bg-transparent text-white font-bold text-[11px] outline-none">
+            <button onclick="resetDateOnly()" class="text-[6px] font-bold text-slate-500 uppercase mt-0.5">Clear Date</button>
         </div>
-        <button onclick="setToday()" class="text-[8px] font-black text-indigo-400 px-2 uppercase">Hari Ini</button>
+        <button onclick="changeDate(1)" class="nav-arrow">›</button>
     </div>
 
     <div class="flex items-center justify-between gap-1 flex-none px-1">
         <div class="flex gap-1 overflow-x-auto no-scrollbar pb-1">
             <button onclick="setStatusFilter('ALL')" id="btn-ALL" class="filter-btn active">ALL</button>
             <button onclick="setStatusFilter('CONFIRM')" id="btn-CONFIRM" class="filter-btn">CONFIRM</button>
-            <button onclick="setStatusFilter('DONE')" id="btn-DONE" class="filter-btn">DONE</button>
-            <button onclick="setStatusFilter('TENTATIVE')" id="btn-TENTATIVE" class="filter-btn">TENTATIVE</button>
+            <button onclick="setStatusFilter('TENTATIVE')" id="btn-TENTATIVE" class="filter-btn text-amber-500">TENTATIVE</button>
+            <button onclick="setStatusFilter('DONE')" id="btn-DONE" class="filter-btn text-emerald-500">DONE</button>
         </div>
         <div class="flex gap-1.5 pl-2 border-l border-white/10">
             <button onclick="toggleHighValue()" id="btn-hv" class="action-btn">💎</button>
-            <a href="graphics.html" class="action-btn" style="background:rgba(99,102,241,0.2); color:#818cf8;">📈</a>
+            <button onclick="filterAllTentative()" id="btn-tent-all" class="action-btn" style="color:#f59e0b">🔔</button>
             <button onclick="refreshData()" id="btn-refresh" class="action-btn">🔄</button>
         </div>
     </div>
 
     <div class="card-base flex-1 flex flex-col overflow-hidden min-h-0">
-        <div class="flex justify-between items-center border-b border-white/10 pb-1.5 mb-2">
-            <p id="list-title" class="text-[9px] font-black uppercase text-indigo-400 italic">LOADING...</p>
-            <span id="event-count" class="bg-indigo-500 text-white text-[9px] px-2 py-0.5 rounded-full font-black">0</span>
+        <div class="flex justify-between items-center border-b border-white/10 pb-1 mb-1.5">
+            <p id="list-title" class="text-[8px] font-black uppercase text-indigo-400 italic">LOADING...</p>
+            <span id="event-count" class="bg-indigo-500 text-white text-[8px] px-2 py-0.5 rounded-full font-black">0</span>
         </div>
-        <div id="event-container" class="space-y-2 flex-1"></div>
-        <div class="mt-2 pt-2 border-t border-white/10 grid grid-cols-2 flex-none">
-            <div class="text-center"><p class="text-[8px] font-bold text-slate-400 uppercase leading-none mb-1">Gross View</p><p id="daily-gross" class="text-[14px] font-black">Rp0</p></div>
-            <div class="text-center border-l border-white/10"><p class="text-[8px] font-bold text-indigo-400 uppercase leading-none mb-1">Nett View</p><p id="daily-nett" class="text-[14px] font-black text-indigo-300">Rp0</p></div>
-        </div>
-    </div>
-
-    <div class="card-base bg-gradient-to-br from-indigo-900/60 to-slate-900/80 py-3 text-center flex-none">
-        <p id="mtd-label" class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-1">MTD PERFORMANCE</p>
-        <h2 id="mtd-onhand" class="text-2xl font-black tracking-tighter">Rp0</h2>
-        <div class="flex items-center gap-3 px-3 mt-1">
-            <div class="bg-white/10 h-1.5 flex-1 rounded-full overflow-hidden">
-                <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-500" style="width: 0%"></div>
-            </div>
-            <span id="mtd-ach" class="text-[11px] font-black text-indigo-300">0%</span>
+        
+        <div id="event-container" class="space-y-2 no-scrollbar"></div>
+        
+        <div class="mt-1.5 pt-1.5 border-t border-white/10 grid grid-cols-2 flex-none">
+            <div class="text-center"><p class="text-[7px] font-bold text-slate-500 uppercase mb-1">Gross</p><p id="daily-gross" class="text-[12px] font-black">Rp0</p></div>
+            <div class="text-center border-l border-white/10"><p class="text-[7px] font-bold text-indigo-400 uppercase mb-1">Nett</p><p id="daily-nett" class="text-[12px] font-black text-indigo-300">Rp0</p></div>
         </div>
     </div>
 
-    <div id="gap-card" class="card-base border-b-4 py-3 flex-none mb-1" style="border-bottom-color: #1e293b;">
-        <div class="grid grid-cols-2 divide-x divide-white/10">
-            <div class="text-center px-1">
-                <p class="text-[8px] font-bold text-slate-500 uppercase mb-0.5 leading-none">Target Budget</p>
-                <p id="mtd-budget" class="text-[13px] font-black">Rp0</p>
+    <div class="flex-none space-y-1">
+        <div id="mtd-card" class="card-base bg-gradient-to-br from-indigo-900/40 to-slate-900/60 py-2 text-center">
+            <p id="mtd-label" class="text-[8px] font-black uppercase text-indigo-200 mb-0.5">MTD PERFORMANCE</p>
+            <h2 id="mtd-onhand" class="text-xl font-black tracking-tighter">Rp0</h2>
+            <div class="flex items-center gap-2 px-4 mt-1">
+                <div class="bg-white/10 h-1 flex-1 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-indigo-500" style="width: 0%"></div>
+                </div>
+                <span id="mtd-ach" class="text-[9px] font-black text-indigo-300">0%</span>
             </div>
-            <div class="text-center px-1">
-                <p class="text-[8px] font-bold text-slate-500 uppercase mb-0.5 leading-none">Variance GAP</p>
-                <p id="mtd-gap" class="text-[13px] font-black">Rp0</p>
+        </div>
+
+        <div id="gap-card" class="card-base border-b-2 py-2">
+            <div class="grid grid-cols-2 divide-x divide-white/10">
+                <div class="text-center px-1">
+                    <p class="text-[7px] font-bold text-slate-500 uppercase mb-0.5 leading-none">Target Budget</p>
+                    <p id="mtd-budget" class="text-[11px] font-black">Rp0</p>
+                </div>
+                <div class="text-center px-1">
+                    <p class="text-[7px] font-bold text-slate-500 uppercase mb-0.5 leading-none">Variance GAP</p>
+                    <p id="mtd-gap" class="text-[11px] font-black">Rp0</p>
+                </div>
             </div>
         </div>
     </div>
@@ -119,37 +123,9 @@
         let cachedRows = [];
         let currentStatusFilter = 'ALL';
         let isHighValueMode = false;
-        const monthNames = ["", "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+        let isGlobalTentative = false;
 
         window.onload = () => setToday();
-
-        // FUNGSI SUPER REFRESH (Clear & Reset)
-        async function refreshData() {
-            const btn = document.getElementById('btn-refresh');
-            const searchInput = document.getElementById('customer-search');
-            
-            btn.style.animation = "spin 1s linear infinite";
-            
-            // Reset UI & Search
-            if (searchInput) searchInput.value = "";
-            currentStatusFilter = 'ALL';
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-ALL').classList.add('active');
-            isHighValueMode = false;
-            document.getElementById('btn-hv').style.background = 'rgba(255,255,255,0.1)';
-            
-            cachedRows = []; // Force fetch
-            setToday(); 
-            await updateDashboard();
-            
-            setTimeout(() => btn.style.animation = "none", 800);
-        }
-
-        function toggleHighValue() {
-            isHighValueMode = !isHighValueMode;
-            document.getElementById('btn-hv').style.background = isHighValueMode ? '#f59e0b' : 'rgba(255,255,255,0.1)';
-            updateDashboard();
-        }
 
         function changeDate(days) {
             const dateInput = document.getElementById('date-input');
@@ -159,18 +135,34 @@
             syncMonthFromDate();
         }
 
-        function changeMonth(direction) {
-            const select = document.getElementById('month-select');
-            let current = select.value === "ALL" ? (new Date().getMonth() + 1) : parseInt(select.value);
-            let next = current + direction;
-            if (next > 12) next = 1; if (next < 1) next = 12;
-            select.value = next.toString();
-            resetDateOnly();
+        async function refreshData() {
+            const btn = document.getElementById('btn-refresh');
+            btn.style.animation = "spin 1s linear infinite";
+            document.getElementById('customer-search').value = "";
+            currentStatusFilter = 'ALL';
+            isHighValueMode = false;
+            isGlobalTentative = false;
+            cachedRows = [];
+            setToday(); 
+            await updateDashboard();
+            setTimeout(() => btn.style.animation = "none", 800);
         }
 
-        function syncMonthFromDate() {
-            const dateVal = document.getElementById('date-input').value;
-            if (dateVal) document.getElementById('month-select').value = parseInt(dateVal.split('-')[1]).toString();
+        function filterAllTentative() {
+            isGlobalTentative = !isGlobalTentative;
+            document.getElementById('btn-tent-all').style.background = isGlobalTentative ? '#f59e0b44' : 'rgba(255,255,255,0.1)';
+            if(isGlobalTentative) {
+                document.getElementById('month-select').value = "ALL";
+                document.getElementById('date-input').value = "";
+                setStatusFilter('TENTATIVE');
+            } else {
+                setToday();
+            }
+        }
+
+        function toggleHighValue() {
+            isHighValueMode = !isHighValueMode;
+            document.getElementById('btn-hv').style.background = isHighValueMode ? '#f59e0b' : 'rgba(255,255,255,0.1)';
             updateDashboard();
         }
 
@@ -181,33 +173,32 @@
             updateDashboard();
         }
 
-        function resetDateOnly() {
-            document.getElementById('date-input').value = "";
+        function resetDateOnly() { document.getElementById('date-input').value = ""; updateDashboard(); }
+        function syncMonthFromDate() { 
+            const val = document.getElementById('date-input').value;
+            if(val) document.getElementById('month-select').value = parseInt(val.split('-')[1]).toString();
+            updateDashboard(); 
+        }
+        function changeMonth(dir) {
+            let s = document.getElementById('month-select');
+            let v = s.value === "ALL" ? 1 : parseInt(s.value) + dir;
+            if(v>12)v=1; if(v<1)v=12; s.value = v.toString(); resetDateOnly();
+        }
+        function setStatusFilter(s) {
+            currentStatusFilter = s;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + s).classList.add('active');
             updateDashboard();
         }
 
-        function setStatusFilter(status) {
-            currentStatusFilter = status;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-' + status).classList.add('active');
-            updateDashboard();
-        }
-
-        function cleanVal(str) {
-            if (!str) return 0;
-            return parseFloat(str.toString().replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0;
-        }
-
-        function formatRp(num) {
-            return "Rp" + Math.round(num).toLocaleString('id-ID');
-        }
+        function cleanVal(s) { return parseFloat((s||"0").toString().replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0; }
+        function formatRp(n) { return "Rp" + Math.round(n).toLocaleString('id-ID'); }
 
         async function updateDashboard() {
             const container = document.getElementById('event-container');
-            const searchInput = document.getElementById('customer-search').value.toLowerCase().trim();
+            const search = document.getElementById('customer-search').value.toLowerCase().trim();
             const dateVal = document.getElementById('date-input').value;
             const monthVal = document.getElementById('month-select').value;
-            const searchVal = searchInput.length >= 1 ? searchInput : "";
 
             try {
                 if (cachedRows.length === 0) {
@@ -216,79 +207,70 @@
                     cachedRows = data.values || [];
                 }
 
-                let filterMode = dateVal ? "DATE" : (monthVal === "ALL" ? "GLOBAL" : "MONTH");
-                let eventHTML = '';
-                let count = 0, grossDailySum = 0, dynamicMtdNett = 0;
+                let html = ''; let count = 0; let gSum = 0; let mtdNett = 0;
 
                 for (let i = 26; i < cachedRows.length; i++) {
                     const r = cachedRows[i];
-                    if (!r || !r[9] || !r[10]) continue;
-                    if (r[10].toLowerCase().includes("total") || i >= 88) continue;
-
+                    if (!r || !r[9] || !r[10] || i >= 88) continue;
                     const gVal = cleanVal(r[14]);
-                    const sDate = r[9], sName = r[10], sStatus = (r[13]||'').toUpperCase().trim(), sVenue = (r[15]||'').toUpperCase();
-                    const dateParts = sDate.split('/');
-                    const dPart = parseInt(dateParts[0]), mPart = parseInt(dateParts[1]), yPart = dateParts[2];
+                    const sDate = r[9], sName = r[10], sStat = (r[13]||'').toUpperCase(), sVen = (r[15]||'').toUpperCase();
+                    const [dP, mP] = sDate.split('/');
 
-                    if (monthVal === "ALL" || mPart === parseInt(monthVal)) {
-                        dynamicMtdNett += (gVal / 1.21);
-                    }
+                    if (monthVal === "ALL" || parseInt(mP) === parseInt(monthVal)) mtdNett += (gVal / 1.21);
 
-                    let matchTime = false;
-                    if (filterMode === "DATE") {
+                    let mTime = false;
+                    if (search.length >= 1) { mTime = true; } // GLOBAL SEARCH AKTIF
+                    else if (dateVal) {
                         const [y, m, d] = dateVal.split('-');
-                        matchTime = (dPart == parseInt(d) && mPart == parseInt(m) && yPart == y);
-                    } else if (filterMode === "MONTH") {
-                        matchTime = (mPart == parseInt(monthVal));
-                    } else { matchTime = true; }
+                        mTime = (parseInt(dP)==parseInt(d) && parseInt(mP)==parseInt(m));
+                    } else if (monthVal !== "ALL") {
+                        mTime = (parseInt(mP) === parseInt(monthVal));
+                    } else { mTime = true; }
 
-                    const matchSearch = searchVal === "" || sName.toLowerCase().startsWith(searchVal);
-                    const matchStatus = (currentStatusFilter === 'ALL') || sStatus.includes(currentStatusFilter);
-                    const matchHV = !isHighValueMode || gVal >= 10000000;
+                    if (mTime && (search==="" || sName.toLowerCase().includes(search)) && (currentStatusFilter==='ALL' || sStat.includes(currentStatusFilter)) && (!isHighValueMode || gVal >= 10000000)) {
+                        count++; gSum += gVal;
+                        let cCol = 'text-slate-400 bg-slate-500/10';
+                        const isTent = sStat.includes("TENTATIVE");
+                        if (sStat.includes("CONFIRM")) cCol = 'text-emerald-400 bg-emerald-500/20';
+                        else if (sStat.includes("DONE")) cCol = 'text-indigo-300 bg-indigo-500/30';
+                        else if (isTent) cCol = 'text-amber-400 bg-amber-500/20';
 
-                    if (matchTime && matchSearch && matchStatus && matchHV) {
-                        count++; grossDailySum += gVal;
-                        let colorClass = 'text-slate-400 bg-slate-500/10';
-                        if (sStatus.includes("CONFIRM")) colorClass = 'text-emerald-400 bg-emerald-500/20';
-                        else if (sStatus.includes("DONE")) colorClass = 'text-indigo-300 bg-indigo-500/30';
-                        else if (sStatus.includes("TENTATIVE")) colorClass = 'text-amber-400 bg-amber-500/20';
-
-                        eventHTML += `<div class="bg-white/[0.06] border border-white/10 rounded-xl p-3 relative text-left">
-                            <div class="absolute top-0 right-0 flex items-center">
-                                <span class="bg-indigo-500/10 text-indigo-200 px-2 py-0.5 text-[6px] font-black border-l border-b border-white/10 italic">${sDate}</span>
-                                <span class="bg-white/10 text-white px-2 py-0.5 text-[6px] font-black border-l border-b border-white/10 uppercase">${sVenue || 'TBD'}</span>
-                                <span class="${colorClass} px-2 py-0.5 text-[6px] font-black border-l border-b border-white/10 uppercase">${sStatus}</span>
+                        html += `<div class="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 relative ${isTent ? 'tentative-glow' : ''}">
+                            ${isTent ? `<div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10"><span class="bg-amber-500/90 text-black text-[9px] font-black px-3 py-0.5 rounded-full shadow-lg animate-[pulse-fast_1.2s_infinite]">FOLLOW UP</span></div>` : ''}
+                            <div class="absolute top-0 right-0 flex items-center z-20">
+                                <span class="bg-indigo-500/10 text-indigo-200 px-1.5 py-0.5 text-[6px] font-black italic border-l border-b border-white/5">${sDate}</span>
+                                <span class="bg-white/10 text-white px-1.5 py-0.5 text-[6px] font-black border-l border-b border-white/5 uppercase truncate max-w-[50px]">${sVen || 'TBD'}</span>
+                                <span class="${cCol} px-1.5 py-0.5 text-[6px] font-black uppercase border-l border-b border-white/5">${sStat}</span>
                             </div>
-                            <p class="text-indigo-300 text-[11px] font-black uppercase truncate pr-32 italic mb-1.5">${sName}</p>
-                            <div class="flex justify-between items-end leading-none">
-                                <p class="text-2xl font-black text-white">${r[11]||'0'}<span class="text-[8px] text-slate-500 ml-1">PAX</span></p>
-                                <p class="text-emerald-400 text-sm font-black">${formatRp(gVal)}</p>
+                            <p class="text-indigo-300 text-[10px] font-bold uppercase truncate pr-20 mb-1 ${isTent ? 'opacity-30' : ''}">${sName}</p>
+                            <div class="flex justify-between items-end leading-none ${isTent ? 'opacity-30' : ''}">
+                                <p class="text-xl font-black text-white">${r[11]||'0'}<span class="text-[7px] text-slate-500 ml-0.5">PAX</span></p>
+                                <div class="text-right">
+                                    <p class="text-emerald-400 text-xs font-black">${formatRp(gVal)}</p>
+                                </div>
                             </div>
                         </div>`;
                     }
                 }
 
-                let targetBudget = 0;
-                if (monthVal !== "ALL") targetBudget = cleanVal(cachedRows[88 + (parseInt(monthVal) - 1)]?.[1]);
-                else { for (let j = 88; j <= 99; j++) targetBudget += cleanVal(cachedRows[j]?.[1]); }
+                let tBud = 0;
+                if (monthVal !== "ALL") tBud = cleanVal(cachedRows[88 + (parseInt(monthVal) - 1)]?.[1]);
+                else { for (let j = 88; j <= 99; j++) tBud += cleanVal(cachedRows[j]?.[1]); }
+                const gap = mtdNett - tBud;
+                const ach = tBud > 0 ? Math.round((mtdNett / tBud) * 100) : 0;
 
-                const varianceGap = dynamicMtdNett - targetBudget;
-                const ach = targetBudget > 0 ? Math.round((dynamicMtdNett / targetBudget) * 100) : 0;
-
-                container.innerHTML = count > 0 ? eventHTML : `<div class="py-20 opacity-20 text-center text-[10px] font-bold uppercase tracking-[0.3em]">Data Kosong</div>`;
-                document.getElementById('list-title').innerText = searchVal ? `SEARCH: "${searchVal.toUpperCase()}"` : (filterMode === "DATE" ? `DAILY: ${dateVal}` : `MONTHLY: ${monthNames[parseInt(monthVal)] || 'TAHUNAN'}`);
+                container.innerHTML = count > 0 ? html : `<div class="py-10 opacity-20 text-center text-[8px] font-black uppercase tracking-widest">No Data</div>`;
+                document.getElementById('list-title').innerText = search.length >= 1 ? `GLOBAL SEARCH: "${search.toUpperCase()}"` : (isGlobalTentative ? "ALL TIME TENTATIVE" : (dateVal ? `DATE: ${dateVal}` : `MONTH: ${monthVal}`));
                 document.getElementById('event-count').innerText = count;
-                document.getElementById('daily-gross').innerText = formatRp(grossDailySum);
-                document.getElementById('daily-nett').innerText = formatRp(grossDailySum / 1.21);
-                document.getElementById('mtd-label').innerText = monthVal === "ALL" ? "TOTAL REVENUE 2026" : `MTD PERFORMANCE (${monthNames[parseInt(monthVal)]})`;
-                document.getElementById('mtd-onhand').innerText = formatRp(dynamicMtdNett);
+                document.getElementById('daily-gross').innerText = formatRp(gSum);
+                document.getElementById('daily-nett').innerText = formatRp(gSum / 1.21);
+                document.getElementById('mtd-onhand').innerText = formatRp(mtdNett);
                 document.getElementById('mtd-ach').innerText = ach + "%";
                 document.getElementById('progress-bar').style.width = Math.min(ach, 100) + "%";
-                document.getElementById('mtd-budget').innerText = formatRp(targetBudget);
-                document.getElementById('mtd-gap').innerText = formatRp(varianceGap);
-                document.getElementById('mtd-gap').className = `text-[13px] font-black ${varianceGap < 0 ? 'text-rose-500' : 'text-emerald-400'}`;
-                document.getElementById('gap-card').style.borderBottomColor = varianceGap < 0 ? "#f43f5e" : "#10b981";
-
+                document.getElementById('mtd-budget').innerText = formatRp(tBud);
+                document.getElementById('mtd-gap').innerText = formatRp(gap);
+                document.getElementById('mtd-gap').className = `text-[11px] font-black ${gap < 0 ? 'text-rose-500' : 'text-emerald-400'}`;
+                document.getElementById('gap-card').style.borderBottomColor = gap < 0 ? "#f43f5e" : "#10b981";
             } catch (e) { console.error(e); }
         }
     </script>
