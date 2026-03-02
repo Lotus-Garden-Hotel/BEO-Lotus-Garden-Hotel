@@ -3,28 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Dashboard Banquet - V.7.1</title>
+    <title>Smart Dashboard Banquet - V.8.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        
-        :root { 
-            --bg-deep: #020617; 
-            --glass: rgba(255, 255, 255, 0.05); 
-            --glass-border: rgba(255, 255, 255, 0.1); 
-            --neon: #6366f1; 
-            --gate-bg: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
-        }
-
-        body.night-mode { 
-            --bg-deep: #000000; 
-            --glass: rgba(0, 0, 0, 0.8); 
-            --glass-border: #1e1b4b; 
-            --neon: #4f46e5; 
-            --gate-bg: #000000;
-        }
-
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep); color: #f8fafc; padding: 8px; margin: 0; box-sizing: border-box; display: flex; flex-direction: column; height: 100dvh; gap: 6px; overflow: hidden; transition: background 0.3s ease; }
+        :root { --bg-deep: #020617; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); --neon: #6366f1; --gate-bg: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
+        body.night-mode { --bg-deep: #000000; --glass: rgba(0, 0, 0, 0.8); --glass-border: #1e1b4b; --neon: #4f46e5; --gate-bg: #000000; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep); color: #f8fafc; padding: 8px; margin: 0; display: flex; flex-direction: column; height: 100dvh; gap: 6px; overflow: hidden; transition: background 0.3s ease; }
         .card-base { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 1rem; padding: 8px; transition: 0.3s; position: relative; }
         .nav-arrow { background: rgba(255,255,255,0.08); color: white; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; border: 1px solid var(--glass-border); }
         select, .search-input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 12px; appearance: none; }
@@ -36,8 +21,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 0.8s linear infinite; }
-        
-        /* Fixed Login Gate Style */
         #login-gate { background: var(--gate-bg); transition: background 0.3s ease; }
     </style>
 </head>
@@ -46,34 +29,21 @@
     <div id="login-gate" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 transition-opacity duration-500">
         <div class="card-base w-full max-w-xs p-8 text-center space-y-6 border-indigo-500/30 shadow-2xl shadow-indigo-500/10">
             <div>
-                <div class="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/30">
-                    <span class="text-xl">🔒</span>
-                </div>
+                <div class="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/30"><span class="text-xl">🔒</span></div>
                 <h2 class="text-xl font-black italic uppercase text-indigo-400">Security Gate</h2>
                 <p class="text-[8px] font-bold text-slate-500 tracking-[0.3em] uppercase mt-1">Authorized Access Only</p>
             </div>
-            
             <div class="space-y-4 text-left">
                 <label class="text-[8px] font-extrabold text-slate-500 uppercase ml-2 tracking-widest">Input PIN</label>
-                <input type="password" id="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" 
-                    class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 text-center text-2xl tracking-[1em] font-black focus:border-indigo-500 outline-none transition-all">
-                
-                <button onclick="checkAuth()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-indigo-500/20 transition-all active:scale-95">
-                    UNLOCK SYSTEM
-                </button>
+                <input type="password" id="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 text-center text-2xl tracking-[1em] font-black focus:border-indigo-500 outline-none transition-all">
+                <button onclick="checkAuth()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-indigo-500/20 transition-all active:scale-95">UNLOCK SYSTEM</button>
             </div>
-            
-            <p id="login-msg" class="text-[8px] font-bold text-rose-500 uppercase tracking-widest opacity-0 transition-opacity">PIN Salah! Akses Ditolak</p>
-            
-            <button onclick="toggleNightMode()" class="text-[10px] font-bold text-slate-500 uppercase border border-white/10 px-4 py-2 rounded-xl bg-white/5">Ganti Tema</button>
+            <p id="login-msg" class="text-[8px] font-bold text-rose-500 uppercase tracking-widest opacity-0 transition-opacity">PIN Salah!</p>
         </div>
     </div>
 
     <div class="flex justify-between items-center px-1 flex-none">
-        <div>
-            <h1 class="text-[12px] font-black italic uppercase text-indigo-400">Banquet Dashboard</h1>
-            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase text-left">Kediri V.7.1</p>
-        </div>
+        <div><h1 class="text-[12px] font-black italic uppercase text-indigo-400">SMART Banquet Dashboard</h1><p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase text-left">Kediri V.8.8 [Stable Sync]</p></div>
         <div class="flex gap-2">
             <button onclick="toggleNightMode()" id="night-btn" class="bg-slate-800 text-[12px] p-2 rounded-lg border border-slate-700">🌙</button>
             <button onclick="window.location.href='graphics.html'" class="bg-indigo-500/20 text-indigo-400 px-2 py-1.5 rounded-full text-[8px] font-black border border-indigo-500/30">ANALYTICS →</button>
@@ -92,7 +62,7 @@
             </select>
             <button onclick="changeMonth(1)" class="nav-arrow">›</button>
         </div>
-        <div class="card-base py-1.5"><input type="text" id="customer-search" class="search-input uppercase" placeholder="CARI NAMA..." oninput="updateDashboard()"></div>
+        <div class="card-base py-1.5"><input type="text" id="customer-search" class="search-input uppercase" placeholder="NAMA/VENUE..." oninput="updateDashboard()"></div>
     </div>
 
     <div class="card-base py-1.5 flex items-center justify-between px-2 flex-none text-center">
@@ -120,27 +90,14 @@
 
     <div class="card-base flex-1 flex flex-col overflow-hidden min-h-0">
         <div id="event-container" class="space-y-2 no-scrollbar pt-1"></div>
-        
         <div class="mt-1.5 pt-1.5 border-t border-white/10 flex flex-col gap-1 flex-none">
             <div class="grid grid-cols-2 divide-x divide-white/10">
-                <div class="text-center">
-                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none mb-1">Total Pax On-List</p>
-                    <p id="daily-pax" class="text-[11px] font-black text-amber-400 leading-none">0</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none mb-1">Total Event</p>
-                    <p id="daily-count" class="text-[11px] font-black text-slate-200 leading-none">0</p>
-                </div>
+                <div class="text-center"><p class="text-[7px] font-bold text-slate-500 uppercase mb-1">Total Pax On-List</p><p id="daily-pax" class="text-[11px] font-black text-amber-400">0</p></div>
+                <div class="text-center"><p class="text-[7px] font-bold text-slate-500 uppercase mb-1">Total Event</p><p id="daily-count" class="text-[11px] font-black text-slate-200">0</p></div>
             </div>
-            <div class="grid grid-cols-2 border-t border-white/5 pt-1">
-                <div class="text-center">
-                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none mb-1">Gross On-List</p>
-                    <p id="daily-gross" class="text-[12px] font-black leading-none">Rp0</p>
-                </div>
-                <div class="text-center border-l border-white/10">
-                    <p class="text-[7px] font-bold text-indigo-400 uppercase leading-none mb-1">Nett On-List</p>
-                    <p id="daily-nett" class="text-[12px] font-black text-indigo-300 leading-none">Rp0</p>
-                </div>
+            <div class="grid grid-cols-2 border-t border-white/5 pt-1 text-center">
+                <div><p class="text-[7px] font-bold text-slate-500 uppercase mb-1">Gross On-List</p><p id="daily-gross" class="text-[12px] font-black">Rp0</p></div>
+                <div class="border-l border-white/10"><p class="text-[7px] font-bold text-indigo-400 uppercase mb-1">Nett On-List</p><p id="daily-nett" class="text-[12px] font-black text-indigo-300">Rp0</p></div>
             </div>
         </div>
     </div>
@@ -157,66 +114,49 @@
             </div>
         </div>
         <div class="card-base py-2 grid grid-cols-2 divide-x divide-white/10 text-center">
-            <div><p class="text-[7px] font-bold text-slate-500 uppercase leading-none mb-1">Budget</p><p id="mtd-budget" class="text-[11px] font-black">Rp0</p></div>
-            <div><p class="text-[7px] font-bold text-slate-500 uppercase leading-none mb-1">Variance (GAP)</p><p id="mtd-gap" class="text-[11px] font-black">Rp0</p></div>
+            <div><p class="text-[7px] font-bold text-slate-500 uppercase mb-1">Budget</p><p id="mtd-budget" class="text-[11px] font-black">Rp0</p></div>
+            <div><p class="text-[7px] font-bold text-slate-500 uppercase mb-1">Variance (GAP)</p><p id="mtd-gap" class="text-[11px] font-black">Rp0</p></div>
         </div>
     </div>
 
     <script>
-        // --- CONFIG & AUTH ---
-        const APP_PIN = "2026"; // GANTI PIN DI SINI
+        const APP_PIN = "2026";
         const API_KEY = 'AIzaSyBZjSmOA81ftVsIJT5etEL19NjPdYTVSQk';
         const SHEET_ID = '1MXwfVXORuTd125BCkKYP_mHC_6O_Z1mZcGno2VCGOeE';
-        const RANGE = 'Summary!A1:P500';
-        
-        let cachedRows = []; 
-        let currentStatusFilter = 'ALL'; 
-        let isHighValueMode = false; 
-        let isGlobalTentative = false;
+        let cachedRows = []; let currentStatusFilter = 'ALL'; let isHighValueMode = false; let isGlobalTentative = false;
 
         window.onload = () => {
             const savedMode = localStorage.getItem('nightMode');
-            if (savedMode === 'enabled') {
-                document.body.classList.add('night-mode');
-                const btn = document.getElementById('night-btn');
-                if(btn) btn.innerText = '☀️';
-            }
-            
+            if (savedMode === 'enabled') document.body.classList.add('night-mode');
             if (sessionStorage.getItem('isAuth') === 'true') {
                 document.getElementById('login-gate').style.display = 'none';
-                setToday();
+                handleDeepLink();
             }
         };
 
-        function toggleNightMode() {
-            const isNight = document.body.classList.toggle('night-mode');
-            localStorage.setItem('nightMode', isNight ? 'enabled' : 'disabled');
-            const btn = document.getElementById('night-btn');
-            if(btn) btn.innerText = isNight ? '☀️' : '🌙';
+        function checkAuth() {
+            if (document.getElementById('pin-input').value === APP_PIN) {
+                sessionStorage.setItem('isAuth', 'true');
+                document.getElementById('login-gate').style.display = 'none';
+                handleDeepLink();
+            } else { alert('PIN Salah!'); }
         }
 
-        function checkAuth() {
-            const input = document.getElementById('pin-input').value;
-            const gate = document.getElementById('login-gate');
-            const msg = document.getElementById('login-msg');
-
-            if (input === APP_PIN) {
-                sessionStorage.setItem('isAuth', 'true');
-                gate.style.opacity = '0';
-                setTimeout(() => {
-                    gate.style.display = 'none';
-                    setToday();
-                }, 500);
-            } else {
-                msg.style.opacity = '1';
-                document.getElementById('pin-input').value = "";
-                setTimeout(() => msg.style.opacity = '0', 2000);
-            }
+        async function handleDeepLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const venue = urlParams.get('venue');
+            if (venue) {
+                document.getElementById('month-select').value = "ALL";
+                document.getElementById('date-input').value = "";
+                document.getElementById('customer-search').value = decodeURIComponent(venue);
+                setStatusFilter('ALL');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else { setToday(); }
+            updateDashboard();
         }
 
         async function updateDashboard() {
             if (sessionStorage.getItem('isAuth') !== 'true') return;
-
             const container = document.getElementById('event-container');
             const search = document.getElementById('customer-search').value.toLowerCase().trim();
             const dateVal = document.getElementById('date-input').value;
@@ -224,56 +164,44 @@
             
             try {
                 if (cachedRows.length === 0) {
-                    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`);
+                    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Summary!A1:P200?key=${API_KEY}`);
                     const data = await res.json();
                     cachedRows = data.values || [];
                 }
                 
-                let html = ''; let listCount = 0; let listGross = 0; let listPax = 0;
+                let html = ''; let lCount = 0; let lGross = 0; let lPax = 0;
                 let mtdNett = 0; let tBud = 0;
 
-                for (let i = 26; i <= 200; i++) { 
-                    const r = cachedRows[i]; 
-                    if (!r || !r[9] || !r[13]) continue; 
-
-                    const gVal = cleanVal(r[14]); 
-                    const pVal = cleanVal(r[11]); 
+                for (let i = 26; i < cachedRows.length; i++) {
+                    const r = cachedRows[i]; if (!r || !r[9] || !r[13]) continue;
+                    const gVal = cleanVal(r[14]); const pVal = cleanVal(r[11]);
                     const sStat = (r[13]||'').toUpperCase();
                     const vName = (r[15]||'').toLowerCase();
                     const [dP, mP] = r[9].split('/');
                     
                     if (monthVal === "ALL" || parseInt(mP) === parseInt(monthVal)) {
-                        if (sStat.includes("CONFIRM") || sStat.includes("DONE")) {
-                            mtdNett += (gVal / 1.21);
-                        }
+                        if (sStat.includes("CONFIRM") || sStat.includes("DONE")) mtdNett += (gVal / 1.21);
                     }
 
                     let mTime = (search.length >= 1) ? true : (dateVal ? (parseInt(dP)==parseInt(dateVal.split('-')[2]) && parseInt(mP)==parseInt(dateVal.split('-')[1])) : (monthVal !== "ALL" ? parseInt(mP) === parseInt(monthVal) : true));
-                    let matchStatus = (currentStatusFilter === 'ALL' || sStat.includes(currentStatusFilter));
-                    let matchSearch = (search === "" || r[10].toLowerCase().includes(search) || vName.includes(search));
-                    let matchHV = (!isHighValueMode || gVal >= 10000000);
+                    let mStatus = (currentStatusFilter === 'ALL' || sStat.includes(currentStatusFilter));
+                    let mSearch = (search === "" || r[10].toLowerCase().includes(search) || vName.includes(search));
+                    let mHV = (!isHighValueMode || gVal >= 10000000);
 
-                    if (mTime && matchSearch && matchStatus && matchHV) {
-                        listCount++; listGross += gVal; listPax += pVal;
-                        let isTentative = sStat.includes("TENTATIVE");
+                    if (mTime && mStatus && mSearch && mHV) {
+                        lCount++; lGross += gVal; lPax += pVal;
+                        let isTent = sStat.includes("TENTATIVE");
+                        let cCol = sStat.includes("DONE") ? 'text-indigo-300 bg-indigo-500/30' : (sStat.includes("CONFIRM") ? 'text-emerald-400 bg-emerald-500/20' : (isTent ? 'text-amber-400 bg-amber-500/20' : 'text-slate-400 bg-slate-500/10'));
                         
-                        let cCol = sStat.includes("DONE") 
-                            ? 'text-indigo-300 bg-indigo-500/30' 
-                            : (sStat.includes("CONFIRM") 
-                                ? 'text-emerald-400 bg-emerald-500/20' 
-                                : (isTentative ? 'text-amber-400 bg-amber-500/20' : 'text-slate-400 bg-slate-500/10'));
-                        
-                        let fuLabel = isTentative ? `<div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0"><span class="bg-amber-500 text-black text-[7px] font-black px-3 py-1 rounded-full animate-pulse border border-amber-300 shadow-xl">FOLLOW UP</span></div>` : '';
-
-                        html += `<div class="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 relative ${isTentative ? 'tentative-glow' : ''}">
-                            ${fuLabel}
-                            <div class="absolute top-0 right-0 flex items-center z-10">
-                                <span class="bg-indigo-500/10 text-indigo-200 px-1.5 py-0.5 text-[6px] font-black">${r[9]}</span>
-                                <span class="bg-white/10 px-1.5 py-0.5 text-[6px] font-black uppercase max-w-[50px] truncate">${(r[15]||'TBD').toUpperCase()}</span>
-                                <span class="${cCol} px-1.5 py-0.5 text-[6px] font-black uppercase">${sStat}</span>
+                        html += `<div class="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 relative ${isTent ? 'tentative-glow' : ''}">
+                            ${isTent ? '<div class="absolute inset-0 flex items-center justify-center pointer-events-none"><span class="bg-amber-500 text-black text-[7px] font-black px-3 py-1 rounded-full animate-pulse border border-amber-300">FOLLOW UP</span></div>' : ''}
+                            <div class="absolute top-0 right-0 flex items-center z-10 text-[6px] font-black uppercase">
+                                <span class="bg-indigo-500/10 text-indigo-200 px-1.5 py-0.5">${r[9]}</span>
+                                <span class="bg-white/10 px-1.5 py-0.5">${(r[15]||'TBD')}</span>
+                                <span class="${cCol} px-1.5 py-0.5">${sStat}</span>
                             </div>
-                            <p class="text-indigo-300 text-[10px] font-bold uppercase truncate pr-20 mb-1 z-10 relative">${r[10]}</p>
-                            <div class="flex justify-between items-end leading-none z-10 relative">
+                            <p class="text-indigo-300 text-[10px] font-bold uppercase truncate pr-20 mb-1 relative z-10">${r[10]}</p>
+                            <div class="flex justify-between items-end leading-none relative z-10">
                                 <p class="text-xl font-black text-white">${r[11]||'0'}<span class="text-[7px] text-slate-500 ml-0.5">PAX</span></p>
                                 <p class="text-emerald-400 text-xs font-black">${formatRp(gVal)}</p>
                             </div>
@@ -283,54 +211,37 @@
 
                 if (monthVal !== "ALL") {
                     tBud = cleanVal(cachedRows[88 + (parseInt(monthVal) - 1)]?.[1]);
-                    document.getElementById('mtd-label').innerText = document.getElementById('month-select').options[document.getElementById('month-select').selectedIndex].text.toUpperCase() + " PERFORMANCE";
                 } else {
                     for (let j = 88; j <= 99; j++) tBud += cleanVal(cachedRows[j]?.[1]);
-                    document.getElementById('mtd-label').innerText = "ANNUAL PERFORMANCE";
                 }
 
-                const gap = mtdNett - tBud;
-                const ach = tBud > 0 ? Math.round((mtdNett / tBud) * 100) : 0;
-                container.innerHTML = listCount > 0 ? html : `<div class="py-10 opacity-20 text-center text-[10px] font-black italic uppercase">No Data Found</div>`;
-                document.getElementById('daily-pax').innerText = listPax.toLocaleString('id-ID');
-                document.getElementById('daily-count').innerText = listCount;
-                document.getElementById('daily-gross').innerText = formatRp(listGross);
-                document.getElementById('daily-nett').innerText = formatRp(listGross / 1.21);
+                const gap = mtdNett - tBud; const ach = tBud > 0 ? Math.round((mtdNett / tBud) * 100) : 0;
+                container.innerHTML = lCount > 0 ? html : `<div class="py-10 opacity-20 text-center text-[10px] font-black uppercase">No Data Found</div>`;
+                document.getElementById('daily-pax').innerText = lPax.toLocaleString('id-ID');
+                document.getElementById('daily-count').innerText = lCount;
+                document.getElementById('daily-gross').innerText = formatRp(lGross);
+                document.getElementById('daily-nett').innerText = formatRp(lGross / 1.21);
                 document.getElementById('mtd-onhand').innerText = formatRp(mtdNett);
                 document.getElementById('mtd-ach').innerText = ach + "%";
                 document.getElementById('progress-bar').style.width = Math.min(ach, 100) + "%";
                 document.getElementById('mtd-budget').innerText = formatRp(tBud);
                 document.getElementById('mtd-gap').innerText = formatRp(gap);
                 document.getElementById('mtd-gap').className = `text-[11px] font-black ${gap < 0 ? 'text-rose-500' : 'text-emerald-400'}`;
-
-            } catch (e) { console.error("Update Error:", e); }
-        }
-
-        async function refreshData() {
-            const btn = document.getElementById('btn-refresh');
-            btn.classList.add('animate-spin');
-            document.getElementById('customer-search').value = "";
-            let n = new Date();
-            document.getElementById('date-input').value = new Date(n.getTime() - (n.getTimezoneOffset()*60000)).toISOString().split('T')[0];
-            document.getElementById('month-select').value = (n.getMonth() + 1).toString();
-            currentStatusFilter = 'ALL';
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-ALL').classList.add('active');
-            cachedRows = []; 
-            await updateDashboard();
-            setTimeout(() => btn.classList.remove('animate-spin'), 600);
+            } catch (e) { console.error(e); }
         }
 
         function cleanVal(s) { return parseFloat((s||"0").toString().replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0; }
         function formatRp(n) { return "Rp" + Math.round(n).toLocaleString('id-ID'); }
-        function changeDate(days) { let d = document.getElementById('date-input'); let c = new Date(d.value || new Date()); c.setDate(c.getDate() + days); d.value = c.toISOString().split('T')[0]; syncMonthFromDate(); }
-        function setToday() { let n = new Date(); document.getElementById('date-input').value = new Date(n.getTime() - (n.getTimezoneOffset()*60000)).toISOString().split('T')[0]; document.getElementById('month-select').value = (n.getMonth() + 1).toString(); updateDashboard(); }
+        function setToday() { let n = new Date(); document.getElementById('date-input').value = new Date(n.getTime() - (n.getTimezoneOffset()*60000)).toISOString().split('T')[0]; document.getElementById('month-select').value = (n.getMonth() + 1).toString(); }
         function resetDateOnly() { document.getElementById('date-input').value = ""; updateDashboard(); }
         function syncMonthFromDate() { let v = document.getElementById('date-input').value; if(v) document.getElementById('month-select').value = parseInt(v.split('-')[1]).toString(); updateDashboard(); }
         function changeMonth(dir) { let s = document.getElementById('month-select'); let v = s.value === "ALL" ? 1 : parseInt(s.value) + dir; if(v>12)v=1; if(v<1)v=12; s.value = v.toString(); resetDateOnly(); }
+        function changeDate(days) { let d = document.getElementById('date-input'); let c = new Date(d.value || new Date()); c.setDate(c.getDate() + days); d.value = c.toISOString().split('T')[0]; syncMonthFromDate(); }
         function setStatusFilter(s) { currentStatusFilter = s; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); document.getElementById('btn-' + s).classList.add('active'); updateDashboard(); }
-        function filterAllTentative() { isGlobalTentative = !isGlobalTentative; if(isGlobalTentative) { document.getElementById('month-select').value = "ALL"; resetDateOnly(); setStatusFilter('TENTATIVE'); } else { setToday(); setStatusFilter('ALL'); } }
         function toggleHighValue() { isHighValueMode = !isHighValueMode; updateDashboard(); }
+        function toggleNightMode() { const isNight = document.body.classList.toggle('night-mode'); localStorage.setItem('nightMode', isNight ? 'enabled' : 'disabled'); document.getElementById('night-btn').innerText = isNight ? '☀️' : '🌙'; }
+        function filterAllTentative() { isGlobalTentative = !isGlobalTentative; if(isGlobalTentative) { document.getElementById('month-select').value = "ALL"; resetDateOnly(); setStatusFilter('TENTATIVE'); } else { setToday(); setStatusFilter('ALL'); } }
+        async function refreshData() { const btn = document.getElementById('btn-refresh'); btn.classList.add('animate-spin'); cachedRows = []; await updateDashboard(); setTimeout(() => btn.classList.remove('animate-spin'), 600); }
     </script>
 </body>
 </html>
