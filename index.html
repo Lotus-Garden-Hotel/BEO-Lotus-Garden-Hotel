@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Dashboard Banquet - V.6.4</title>
+    <title>Smart Dashboard Banquet - V.6.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
@@ -27,7 +27,7 @@
     <div class="flex justify-between items-center px-1 flex-none">
         <div>
             <h1 class="text-[12px] font-black italic uppercase text-indigo-400">Banquet Dashboard</h1>
-            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase">Kediri V.6.4</p>
+            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase text-left">Kediri V.6.5</p>
         </div>
         <div class="flex gap-2">
             <button onclick="toggleNightMode()" id="night-btn" class="bg-slate-800 text-[12px] p-2 rounded-lg border border-slate-700">🌙</button>
@@ -38,7 +38,7 @@
     <div class="grid grid-cols-2 gap-2 flex-none">
         <div class="card-base py-1.5 flex items-center">
             <button onclick="changeMonth(-1)" class="nav-arrow">‹</button>
-            <select id="month-select" onchange="resetDateOnly()" class="flex-1">
+            <select id="month-select" onchange="resetDateOnly()" class="flex-1 uppercase">
                 <option value="ALL">-- SEMUA --</option>
                 <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
                 <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
@@ -47,14 +47,14 @@
             </select>
             <button onclick="changeMonth(1)" class="nav-arrow">›</button>
         </div>
-        <div class="card-base py-1.5"><input type="text" id="customer-search" class="search-input uppercase" placeholder="CARI NAMA / VENUE..." oninput="updateDashboard()"></div>
+        <div class="card-base py-1.5"><input type="text" id="customer-search" class="search-input uppercase" placeholder="CARI NAMA..." oninput="updateDashboard()"></div>
     </div>
 
-    <div class="card-base py-1.5 flex items-center justify-between px-2 flex-none">
+    <div class="card-base py-1.5 flex items-center justify-between px-2 flex-none text-center">
         <button onclick="changeDate(-1)" class="nav-arrow">‹</button>
         <div class="flex flex-col items-center">
             <input type="date" id="date-input" onchange="syncMonthFromDate()" class="bg-transparent text-white font-bold text-[11px] outline-none">
-            <button onclick="resetDateOnly()" class="text-[6px] font-bold text-slate-500 uppercase">Clear Date</button>
+            <button onclick="resetDateOnly()" class="text-[6px] font-bold text-slate-500 uppercase">Clear Date Filter</button>
         </div>
         <button onclick="changeDate(1)" class="nav-arrow">›</button>
     </div>
@@ -64,7 +64,7 @@
             <button onclick="setStatusFilter('ALL')" id="btn-ALL" class="filter-btn active">ALL</button>
             <button onclick="setStatusFilter('CONFIRM')" id="btn-CONFIRM" class="filter-btn text-emerald-500">CONFIRM</button>
             <button onclick="setStatusFilter('TENTATIVE')" id="btn-TENTATIVE" class="filter-btn text-amber-500">TENTATIVE</button>
-            <button onclick="setStatusFilter('DONE')" id="btn-DONE" class="filter-btn">DONE</button>
+            <button onclick="setStatusFilter('DONE')" id="btn-DONE" class="filter-btn text-indigo-400">DONE</button>
         </div>
         <div class="flex gap-1.5 pl-2 border-l border-white/10">
             <button onclick="toggleHighValue()" id="btn-hv" class="action-btn">💎</button>
@@ -79,17 +79,23 @@
         <div class="mt-1.5 pt-1.5 border-t border-white/10 flex flex-col gap-1 flex-none">
             <div class="grid grid-cols-2 divide-x divide-white/10">
                 <div class="text-center">
-                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none">Total Pax On-List</p>
-                    <p id="daily-pax" class="text-[11px] font-black text-amber-400">0</p>
+                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none mb-1">Total Pax On-List</p>
+                    <p id="daily-pax" class="text-[11px] font-black text-amber-400 leading-none">0</p>
                 </div>
                 <div class="text-center">
-                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none">Total Event</p>
-                    <p id="daily-count" class="text-[11px] font-black text-slate-200">0</p>
+                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none mb-1">Total Event</p>
+                    <p id="daily-count" class="text-[11px] font-black text-slate-200 leading-none">0</p>
                 </div>
             </div>
             <div class="grid grid-cols-2 border-t border-white/5 pt-1">
-                <div class="text-center"><p class="text-[7px] font-bold text-slate-500 uppercase">Gross On-List</p><p id="daily-gross" class="text-[12px] font-black">Rp0</p></div>
-                <div class="text-center border-l border-white/10"><p class="text-[7px] font-bold text-indigo-400 uppercase">Nett On-List</p><p id="daily-nett" class="text-[12px] font-black text-indigo-300">Rp0</p></div>
+                <div class="text-center">
+                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none mb-1">Gross On-List</p>
+                    <p id="daily-gross" class="text-[12px] font-black leading-none">Rp0</p>
+                </div>
+                <div class="text-center border-l border-white/10">
+                    <p class="text-[7px] font-bold text-indigo-400 uppercase leading-none mb-1">Nett On-List</p>
+                    <p id="daily-nett" class="text-[12px] font-black text-indigo-300 leading-none">Rp0</p>
+                </div>
             </div>
         </div>
     </div>
@@ -97,9 +103,11 @@
     <div class="flex-none space-y-1">
         <div class="card-base bg-gradient-to-br from-indigo-900/40 to-slate-900/60 py-2 text-center">
             <p id="mtd-label" class="text-[8px] font-black uppercase text-indigo-200 tracking-widest">PERFORMANCE</p>
-            <h2 id="mtd-onhand" class="text-xl font-black tracking-tighter">Rp0</h2>
+            <h2 id="mtd-onhand" class="text-xl font-black tracking-tighter leading-none my-1">Rp0</h2>
             <div class="flex items-center gap-2 px-4 mt-1">
-                <div class="bg-white/10 h-1.5 flex-1 rounded-full overflow-hidden"><div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-500" style="width: 0%"></div></div>
+                <div class="bg-white/10 h-1.5 flex-1 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-indigo-500 transition-all duration-500" style="width: 0%"></div>
+                </div>
                 <span id="mtd-ach" class="text-[10px] font-black text-indigo-300">0%</span>
             </div>
         </div>
@@ -118,19 +126,7 @@
         window.onload = () => {
             const savedMode = localStorage.getItem('nightMode');
             if (savedMode === 'enabled') document.body.classList.add('night-mode');
-
-            // LOGIKA DEEP LINK DARI GRAPHICS
-            const urlParams = new URLSearchParams(window.location.search);
-            const venueParam = urlParams.get('venue');
-
-            if (venueParam) {
-                document.getElementById('month-select').value = "ALL";
-                document.getElementById('date-input').value = "";
-                document.getElementById('customer-search').value = venueParam;
-                updateDashboard();
-            } else {
-                setToday();
-            }
+            setToday();
         };
 
         function toggleNightMode() {
@@ -155,27 +151,40 @@
                 let html = ''; let listCount = 0; let listGross = 0; let listPax = 0;
                 let mtdNett = 0; let tBud = 0;
 
-                for (let i = 26; i <= 87; i++) {
-                    const r = cachedRows[i]; if (!r || !r[9] || !r[14]) continue;
-                    const gVal = cleanVal(r[14]);
-                    const pVal = cleanVal(r[11]);
+                for (let i = 26; i <= 100; i++) { // Range diperlebar sampai baris 100
+                    const r = cachedRows[i]; 
+                    if (!r || !r[9] || !r[13]) continue; 
+
+                    const gVal = cleanVal(r[14]); 
+                    const pVal = cleanVal(r[11]); 
                     const sStat = (r[13]||'').toUpperCase();
-                    const vName = (r[15]||'').toLowerCase(); // Ambil Nama Venue
+                    const vName = (r[15]||'').toLowerCase();
                     const [dP, mP] = r[9].split('/');
                     
+                    // PERFORMANCE CALC (Confirm & Done)
                     if (monthVal === "ALL" || parseInt(mP) === parseInt(monthVal)) {
                         if (sStat.includes("CONFIRM") || sStat.includes("DONE")) {
                             mtdNett += (gVal / 1.21);
                         }
                     }
 
+                    // FILTER LOGIC - FIX TENTATIVE BUG
                     let mTime = (search.length >= 1) ? true : (dateVal ? (parseInt(dP)==parseInt(dateVal.split('-')[2]) && parseInt(mP)==parseInt(dateVal.split('-')[1])) : (monthVal !== "ALL" ? parseInt(mP) === parseInt(monthVal) : true));
-                    
-                    // PENYESUAIAN FILTER: Cek Nama Customer r[10] ATAU Nama Venue r[15]
-                    if (mTime && (search==="" || r[10].toLowerCase().includes(search) || vName.includes(search)) && (currentStatusFilter==='ALL' || sStat.includes(currentStatusFilter)) && (!isHighValueMode || gVal >= 10000000)) {
+                    let matchStatus = (currentStatusFilter === 'ALL' || sStat.includes(currentStatusFilter));
+                    let matchSearch = (search === "" || r[10].toLowerCase().includes(search) || vName.includes(search));
+                    let matchHV = (!isHighValueMode || gVal >= 10000000);
+
+                    if (mTime && matchSearch && matchStatus && matchHV) {
                         listCount++; listGross += gVal; listPax += pVal;
                         let isTentative = sStat.includes("TENTATIVE");
-                        let cCol = sStat.includes("CONFIRM") ? 'text-emerald-400 bg-emerald-500/20' : (sStat.includes("DONE") ? 'text-indigo-300 bg-indigo-500/30' : (isTentative ? 'text-amber-400 bg-amber-500/20' : 'text-slate-400 bg-slate-500/10'));
+                        
+                        // NEW COLORS: CONFIRM = HIJAU, DONE = INDIGO
+                        let cCol = sStat.includes("DONE") 
+                            ? 'text-indigo-300 bg-indigo-500/30' 
+                            : (sStat.includes("CONFIRM") 
+                                ? 'text-emerald-400 bg-emerald-500/20' 
+                                : (isTentative ? 'text-amber-400 bg-amber-500/20' : 'text-slate-400 bg-slate-500/10'));
+                        
                         let fuLabel = isTentative ? `<div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0"><span class="bg-amber-500 text-black text-[7px] font-black px-3 py-1 rounded-full animate-pulse border border-amber-300 shadow-xl">FOLLOW UP</span></div>` : '';
 
                         html += `<div class="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 relative ${isTentative ? 'tentative-glow' : ''}">
@@ -204,7 +213,7 @@
 
                 const gap = mtdNett - tBud;
                 const ach = tBud > 0 ? Math.round((mtdNett / tBud) * 100) : 0;
-                container.innerHTML = listCount > 0 ? html : `<div class="py-10 opacity-20 text-center text-[10px] font-black italic uppercase">No Event Data</div>`;
+                container.innerHTML = listCount > 0 ? html : `<div class="py-10 opacity-20 text-center text-[10px] font-black italic uppercase">No Data Found</div>`;
                 document.getElementById('daily-pax').innerText = listPax.toLocaleString('id-ID');
                 document.getElementById('daily-count').innerText = listCount;
                 document.getElementById('daily-gross').innerText = formatRp(listGross);
@@ -215,6 +224,7 @@
                 document.getElementById('mtd-budget').innerText = formatRp(tBud);
                 document.getElementById('mtd-gap').innerText = formatRp(gap);
                 document.getElementById('mtd-gap').className = `text-[11px] font-black ${gap < 0 ? 'text-rose-500' : 'text-emerald-400'}`;
+
             } catch (e) { console.error("Update Error:", e); }
         }
 
