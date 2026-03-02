@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banquet Analytics - V.6.1</title>
+    <title>Banquet Analytics - V.6.4 [Full Sync]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -20,9 +20,9 @@
     <div class="flex items-center justify-between mb-6 px-1">
         <div class="flex items-center gap-4">
             <button onclick="window.location.href='index.html'" class="btn-nav bg-white/10 px-3 py-1.5 rounded-xl text-indigo-400 font-bold text-[10px] border border-white/5 tracking-tighter">← DASHBOARD</button>
-            <h1 class="text-lg font-black uppercase italic tracking-tighter">Analytics <span class="text-indigo-500 text-xs">V.6.1</span></h1>
+            <h1 class="text-lg font-black uppercase italic tracking-tighter">Analytics <span class="text-indigo-500 text-xs">V.6.4</span></h1>
         </div>
-        <div class="text-[8px] font-black bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-full border border-indigo-500/30 uppercase italic">Live Data</div>
+        <button onclick="toggleNightMode()" class="text-xs">🌙</button>
     </div>
 
     <div class="space-y-4">
@@ -34,7 +34,7 @@
                 </div>
                 <div class="text-right">
                     <p id="total-annual" class="text-[12px] font-black text-emerald-400">Rp0</p>
-                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none">Nett YTD</p>
+                    <p class="text-[7px] font-bold text-slate-500 uppercase leading-none">Nett YTD (Conf+Done)</p>
                 </div>
             </div>
             <div class="relative h-[280px]"><canvas id="revenueChart"></canvas></div>
@@ -57,15 +57,14 @@
                 <h2 id="avg-ach" class="text-lg font-black text-indigo-400">0%</h2>
             </div>
             <div class="card-base text-center border-b-2 border-slate-700 py-3">
-                <p class="text-[7px] font-black text-slate-500 uppercase mb-1 tracking-widest">Confirmed Events</p>
+                <p class="text-[7px] font-black text-slate-500 uppercase mb-1 tracking-widest">Total Intensity (All)</p>
                 <h2 id="total-event-count" class="text-lg font-black text-white">0</h2>
             </div>
         </div>
 
         <div class="card-base">
-            <p class="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">Venues Usage Intensity</p>
-            <div id="venue-list" class="grid grid-cols-2 gap-2">
-                </div>
+            <p class="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 text-center">Venues Usage Intensity (Confirm+Done+Tentative)</p>
+            <div id="venue-list" class="grid grid-cols-2 gap-2"></div>
         </div>
     </div>
 
@@ -95,25 +94,27 @@
                 }
                 
                 let realData = new Array(12).fill(0); 
-                let count = 0, annualNett = 0, totalPax = 0;
+                let totalIntensityCount = 0, annualNett = 0, totalPax = 0;
                 let venueMap = {};
 
-                for(let i=26; i<=87; i++) {
-                    const r = rows[i]; if(!r || !r[9] || !r[14]) continue;
-                    const sStat = (r[13]||'').toUpperCase();
-                    
-                    if(sStat.includes("CONFIRM") || sStat.includes("DONE")) {
-                        const nett = cleanVal(r[14]) / 1.21;
-                        const pax = cleanVal(r[11]);
-                        const venue = (r[15] || 'TBD').toUpperCase().trim();
-                        const m = parseInt(r[9].split('/')[1]);
+                for(let i=26; i<=200; i++) {
+                    const r = rows[i]; if(!r || !r[9] || !r[13]) continue;
+                    const sStat = r[13].toUpperCase();
+                    const nett = cleanVal(r[14]) / 1.21;
+                    const pax = cleanVal(r[11]);
+                    const venue = (r[15] || 'TBD').toUpperCase().trim();
+                    const [dP, mP] = r[9].split('/');
+                    const m = parseInt(mP);
 
-                        if(m >= 1 && m <= 12) { 
-                            realData[m-1] += nett; 
-                            count++; 
+                    // SINKRONISASI LOGIC: ALL STATUS untuk Intensity & Performance
+                    if(sStat.includes("CONFIRM") || sStat.includes("DONE") || sStat.includes("TENTATIVE")) {
+                        if(m >= 1 && m <= 12) {
+                            // Hitung Revenue (Biasanya confirm/done saja untuk nett, tapi ini kita samakan dengan dashboard ALL)
+                            realData[m-1] += nett;
                             annualNett += nett;
                             totalPax += pax;
-                            if(venue) venueMap[venue] = (venueMap[venue] || 0) + 1;
+                            totalIntensityCount++;
+                            venueMap[venue] = (venueMap[venue] || 0) + 1;
                         }
                     }
                 }
@@ -122,13 +123,14 @@
                 let totalAch = 0, activeMonths = 0;
                 achData.forEach((v, i) => { if(realData[i] > 0 || budgetData[i] > 0) { totalAch += v; activeMonths++; } });
                 
+                // UPDATE SEMUA KOTAK SUMMARY (RESTORED)
                 document.getElementById('annual-progress').innerText = (totalBudgetSetahun > 0 ? Math.round((annualNett / totalBudgetSetahun) * 100) : 0) + "%";
                 document.getElementById('avg-ach').innerText = Math.round(totalAch / (activeMonths || 1)) + "%";
-                document.getElementById('total-event-count').innerText = count;
+                document.getElementById('total-event-count').innerText = totalIntensityCount;
                 document.getElementById('total-pax-count').innerText = totalPax.toLocaleString('id-ID');
                 document.getElementById('total-annual').innerText = "Rp" + Math.round(annualNett).toLocaleString('id-ID');
 
-                // RENDER VENUE DENGAN LINK KE INDEX.HTML
+                // RENDER VENUE DENGAN LINK SINKRON
                 const venueContainer = document.getElementById('venue-list');
                 let venueHtml = '';
                 Object.entries(venueMap).sort((a,b) => b[1] - a[1]).forEach(([name, val]) => {
@@ -138,7 +140,7 @@
                             <span class="text-[11px] font-black text-indigo-400">${val}<span class="text-[7px] ml-0.5 opacity-60 italic">×</span></span>
                         </a>`;
                 });
-                venueContainer.innerHTML = venueHtml || '<p class="col-span-2 text-center text-[10px] py-4 opacity-20 italic">No Venue Data Available</p>';
+                venueContainer.innerHTML = venueHtml || '<p class="col-span-2 text-center text-[10px] py-4 opacity-20 italic">No Data</p>';
 
                 renderChart(realData, budgetData, achData);
             } catch (e) { console.error(e); }
@@ -170,6 +172,11 @@
             });
         }
         function cleanVal(s) { return parseFloat((s || "0").toString().replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0; }
+        function toggleNightMode() {
+            const isNight = document.body.classList.toggle('night-mode');
+            localStorage.setItem('nightMode', isNight ? 'enabled' : 'disabled');
+            fetchData();
+        }
     </script>
 </body>
 </html>
