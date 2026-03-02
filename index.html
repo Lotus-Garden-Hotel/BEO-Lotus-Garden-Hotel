@@ -3,13 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Dashboard Banquet - V.7.0 Security</title>
+    <title>Smart Dashboard Banquet - V.7.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        :root { --bg-deep: #020617; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); --neon: #6366f1; }
-        body.night-mode { --bg-deep: #000000; --glass: rgba(0, 0, 0, 0.8); --glass-border: #1e1b4b; --neon: #4f46e5; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep); color: #f8fafc; padding: 8px; margin: 0; box-sizing: border-box; display: flex; flex-direction: column; height: 100dvh; gap: 6px; overflow: hidden; transition: 0.3s; }
+        
+        :root { 
+            --bg-deep: #020617; 
+            --glass: rgba(255, 255, 255, 0.05); 
+            --glass-border: rgba(255, 255, 255, 0.1); 
+            --neon: #6366f1; 
+            --gate-bg: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+        }
+
+        body.night-mode { 
+            --bg-deep: #000000; 
+            --glass: rgba(0, 0, 0, 0.8); 
+            --glass-border: #1e1b4b; 
+            --neon: #4f46e5; 
+            --gate-bg: #000000;
+        }
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-deep); color: #f8fafc; padding: 8px; margin: 0; box-sizing: border-box; display: flex; flex-direction: column; height: 100dvh; gap: 6px; overflow: hidden; transition: background 0.3s ease; }
         .card-base { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 1rem; padding: 8px; transition: 0.3s; position: relative; }
         .nav-arrow { background: rgba(255,255,255,0.08); color: white; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 800; border: 1px solid var(--glass-border); }
         select, .search-input { background: transparent; color: white; border: none; outline: none; font-weight: 800; width: 100%; text-align: center; font-size: 12px; appearance: none; }
@@ -22,8 +37,8 @@
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 0.8s linear infinite; }
         
-        /* Security Gate Styles */
-        #login-gate { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
+        /* Fixed Login Gate Style */
+        #login-gate { background: var(--gate-bg); transition: background 0.3s ease; }
     </style>
 </head>
 <body>
@@ -38,7 +53,8 @@
                 <p class="text-[8px] font-bold text-slate-500 tracking-[0.3em] uppercase mt-1">Authorized Access Only</p>
             </div>
             
-            <div class="space-y-4">
+            <div class="space-y-4 text-left">
+                <label class="text-[8px] font-extrabold text-slate-500 uppercase ml-2 tracking-widest">Input PIN</label>
                 <input type="password" id="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" 
                     class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 text-center text-2xl tracking-[1em] font-black focus:border-indigo-500 outline-none transition-all">
                 
@@ -48,13 +64,15 @@
             </div>
             
             <p id="login-msg" class="text-[8px] font-bold text-rose-500 uppercase tracking-widest opacity-0 transition-opacity">PIN Salah! Akses Ditolak</p>
+            
+            <button onclick="toggleNightMode()" class="text-[10px] font-bold text-slate-500 uppercase border border-white/10 px-4 py-2 rounded-xl bg-white/5">Ganti Tema</button>
         </div>
     </div>
 
     <div class="flex justify-between items-center px-1 flex-none">
         <div>
             <h1 class="text-[12px] font-black italic uppercase text-indigo-400">Banquet Dashboard</h1>
-            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase text-left">Kediri V.7.0</p>
+            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase text-left">Kediri V.7.1</p>
         </div>
         <div class="flex gap-2">
             <button onclick="toggleNightMode()" id="night-btn" class="bg-slate-800 text-[12px] p-2 rounded-lg border border-slate-700">🌙</button>
@@ -81,7 +99,7 @@
         <button onclick="changeDate(-1)" class="nav-arrow">‹</button>
         <div class="flex flex-col items-center">
             <input type="date" id="date-input" onchange="syncMonthFromDate()" class="bg-transparent text-white font-bold text-[11px] outline-none">
-            <button onclick="resetDateOnly()" class="text-[6px] font-bold text-slate-500 uppercase">Clear Date</button>
+            <button onclick="resetDateOnly()" class="text-[6px] font-bold text-slate-500 uppercase">Clear Date Filter</button>
         </div>
         <button onclick="changeDate(1)" class="nav-arrow">›</button>
     </div>
@@ -146,7 +164,7 @@
 
     <script>
         // --- CONFIG & AUTH ---
-        const APP_PIN = "2026"; // GANTI PIN ANDA DISINI
+        const APP_PIN = "1234"; // GANTI PIN DI SINI
         const API_KEY = 'AIzaSyBZjSmOA81ftVsIJT5etEL19NjPdYTVSQk';
         const SHEET_ID = '1MXwfVXORuTd125BCkKYP_mHC_6O_Z1mZcGno2VCGOeE';
         const RANGE = 'Summary!A1:P500';
@@ -158,14 +176,24 @@
 
         window.onload = () => {
             const savedMode = localStorage.getItem('nightMode');
-            if (savedMode === 'enabled') document.body.classList.add('night-mode');
+            if (savedMode === 'enabled') {
+                document.body.classList.add('night-mode');
+                const btn = document.getElementById('night-btn');
+                if(btn) btn.innerText = '☀️';
+            }
             
-            // Cek Session Auth
             if (sessionStorage.getItem('isAuth') === 'true') {
                 document.getElementById('login-gate').style.display = 'none';
                 setToday();
             }
         };
+
+        function toggleNightMode() {
+            const isNight = document.body.classList.toggle('night-mode');
+            localStorage.setItem('nightMode', isNight ? 'enabled' : 'disabled');
+            const btn = document.getElementById('night-btn');
+            if(btn) btn.innerText = isNight ? '☀️' : '🌙';
+        }
 
         function checkAuth() {
             const input = document.getElementById('pin-input').value;
@@ -204,7 +232,7 @@
                 let html = ''; let listCount = 0; let listGross = 0; let listPax = 0;
                 let mtdNett = 0; let tBud = 0;
 
-                for (let i = 26; i <= 150; i++) { // Range diperluas
+                for (let i = 26; i <= 200; i++) { 
                     const r = cachedRows[i]; 
                     if (!r || !r[9] || !r[13]) continue; 
 
@@ -229,7 +257,6 @@
                         listCount++; listGross += gVal; listPax += pVal;
                         let isTentative = sStat.includes("TENTATIVE");
                         
-                        // COLORS: CONFIRM = HIJAU, DONE = INDIGO (Sesuai Request V.6.5/7.0)
                         let cCol = sStat.includes("DONE") 
                             ? 'text-indigo-300 bg-indigo-500/30' 
                             : (sStat.includes("CONFIRM") 
