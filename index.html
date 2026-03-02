@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Dashboard Banquet - V.6.5</title>
+    <title>Smart Dashboard Banquet - V.7.0 Security</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
@@ -21,13 +21,40 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 0.8s linear infinite; }
+        
+        /* Security Gate Styles */
+        #login-gate { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
     </style>
 </head>
 <body>
+
+    <div id="login-gate" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 transition-opacity duration-500">
+        <div class="card-base w-full max-w-xs p-8 text-center space-y-6 border-indigo-500/30 shadow-2xl shadow-indigo-500/10">
+            <div>
+                <div class="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-indigo-500/30">
+                    <span class="text-xl">🔒</span>
+                </div>
+                <h2 class="text-xl font-black italic uppercase text-indigo-400">Security Gate</h2>
+                <p class="text-[8px] font-bold text-slate-500 tracking-[0.3em] uppercase mt-1">Authorized Access Only</p>
+            </div>
+            
+            <div class="space-y-4">
+                <input type="password" id="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" 
+                    class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 text-center text-2xl tracking-[1em] font-black focus:border-indigo-500 outline-none transition-all">
+                
+                <button onclick="checkAuth()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-indigo-500/20 transition-all active:scale-95">
+                    UNLOCK SYSTEM
+                </button>
+            </div>
+            
+            <p id="login-msg" class="text-[8px] font-bold text-rose-500 uppercase tracking-widest opacity-0 transition-opacity">PIN Salah! Akses Ditolak</p>
+        </div>
+    </div>
+
     <div class="flex justify-between items-center px-1 flex-none">
         <div>
             <h1 class="text-[12px] font-black italic uppercase text-indigo-400">Banquet Dashboard</h1>
-            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase text-left">Kediri V.6.5</p>
+            <p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase text-left">Kediri V.7.0</p>
         </div>
         <div class="flex gap-2">
             <button onclick="toggleNightMode()" id="night-btn" class="bg-slate-800 text-[12px] p-2 rounded-lg border border-slate-700">🌙</button>
@@ -54,7 +81,7 @@
         <button onclick="changeDate(-1)" class="nav-arrow">‹</button>
         <div class="flex flex-col items-center">
             <input type="date" id="date-input" onchange="syncMonthFromDate()" class="bg-transparent text-white font-bold text-[11px] outline-none">
-            <button onclick="resetDateOnly()" class="text-[6px] font-bold text-slate-500 uppercase">Clear Date Filter</button>
+            <button onclick="resetDateOnly()" class="text-[6px] font-bold text-slate-500 uppercase">Clear Date</button>
         </div>
         <button onclick="changeDate(1)" class="nav-arrow">›</button>
     </div>
@@ -118,24 +145,50 @@
     </div>
 
     <script>
+        // --- CONFIG & AUTH ---
+        const APP_PIN = "2026"; // GANTI PIN ANDA DISINI
         const API_KEY = 'AIzaSyBZjSmOA81ftVsIJT5etEL19NjPdYTVSQk';
         const SHEET_ID = '1MXwfVXORuTd125BCkKYP_mHC_6O_Z1mZcGno2VCGOeE';
         const RANGE = 'Summary!A1:P500';
-        let cachedRows = []; let currentStatusFilter = 'ALL'; let isHighValueMode = false; let isGlobalTentative = false;
+        
+        let cachedRows = []; 
+        let currentStatusFilter = 'ALL'; 
+        let isHighValueMode = false; 
+        let isGlobalTentative = false;
 
         window.onload = () => {
             const savedMode = localStorage.getItem('nightMode');
             if (savedMode === 'enabled') document.body.classList.add('night-mode');
-            setToday();
+            
+            // Cek Session Auth
+            if (sessionStorage.getItem('isAuth') === 'true') {
+                document.getElementById('login-gate').style.display = 'none';
+                setToday();
+            }
         };
 
-        function toggleNightMode() {
-            const isNight = document.body.classList.toggle('night-mode');
-            localStorage.setItem('nightMode', isNight ? 'enabled' : 'disabled');
-            document.getElementById('night-btn').innerText = isNight ? '☀️' : '🌙';
+        function checkAuth() {
+            const input = document.getElementById('pin-input').value;
+            const gate = document.getElementById('login-gate');
+            const msg = document.getElementById('login-msg');
+
+            if (input === APP_PIN) {
+                sessionStorage.setItem('isAuth', 'true');
+                gate.style.opacity = '0';
+                setTimeout(() => {
+                    gate.style.display = 'none';
+                    setToday();
+                }, 500);
+            } else {
+                msg.style.opacity = '1';
+                document.getElementById('pin-input').value = "";
+                setTimeout(() => msg.style.opacity = '0', 2000);
+            }
         }
 
         async function updateDashboard() {
+            if (sessionStorage.getItem('isAuth') !== 'true') return;
+
             const container = document.getElementById('event-container');
             const search = document.getElementById('customer-search').value.toLowerCase().trim();
             const dateVal = document.getElementById('date-input').value;
@@ -151,7 +204,7 @@
                 let html = ''; let listCount = 0; let listGross = 0; let listPax = 0;
                 let mtdNett = 0; let tBud = 0;
 
-                for (let i = 26; i <= 100; i++) { // Range diperlebar sampai baris 100
+                for (let i = 26; i <= 150; i++) { // Range diperluas
                     const r = cachedRows[i]; 
                     if (!r || !r[9] || !r[13]) continue; 
 
@@ -161,14 +214,12 @@
                     const vName = (r[15]||'').toLowerCase();
                     const [dP, mP] = r[9].split('/');
                     
-                    // PERFORMANCE CALC (Confirm & Done)
                     if (monthVal === "ALL" || parseInt(mP) === parseInt(monthVal)) {
                         if (sStat.includes("CONFIRM") || sStat.includes("DONE")) {
                             mtdNett += (gVal / 1.21);
                         }
                     }
 
-                    // FILTER LOGIC - FIX TENTATIVE BUG
                     let mTime = (search.length >= 1) ? true : (dateVal ? (parseInt(dP)==parseInt(dateVal.split('-')[2]) && parseInt(mP)==parseInt(dateVal.split('-')[1])) : (monthVal !== "ALL" ? parseInt(mP) === parseInt(monthVal) : true));
                     let matchStatus = (currentStatusFilter === 'ALL' || sStat.includes(currentStatusFilter));
                     let matchSearch = (search === "" || r[10].toLowerCase().includes(search) || vName.includes(search));
@@ -178,7 +229,7 @@
                         listCount++; listGross += gVal; listPax += pVal;
                         let isTentative = sStat.includes("TENTATIVE");
                         
-                        // NEW COLORS: CONFIRM = HIJAU, DONE = INDIGO
+                        // COLORS: CONFIRM = HIJAU, DONE = INDIGO (Sesuai Request V.6.5/7.0)
                         let cCol = sStat.includes("DONE") 
                             ? 'text-indigo-300 bg-indigo-500/30' 
                             : (sStat.includes("CONFIRM") 
