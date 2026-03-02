@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Dashboard Banquet - V.8.8</title>
+    <title>Smart Dashboard Banquet - V.8.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
@@ -43,7 +43,7 @@
     </div>
 
     <div class="flex justify-between items-center px-1 flex-none">
-        <div><h1 class="text-[12px] font-black italic uppercase text-indigo-400">SMART Banquet Dashboard</h1><p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase text-left">Kediri V.8.8 [Stable Sync]</p></div>
+        <div><h1 class="text-[12px] font-black italic uppercase text-indigo-400">Smart Banquet Dashboard</h1><p class="text-[6px] font-bold text-slate-500 tracking-widest uppercase text-left">Kediri V.8.9 Pro</p></div>
         <div class="flex gap-2">
             <button onclick="toggleNightMode()" id="night-btn" class="bg-slate-800 text-[12px] p-2 rounded-lg border border-slate-700">🌙</button>
             <button onclick="window.location.href='graphics.html'" class="bg-indigo-500/20 text-indigo-400 px-2 py-1.5 rounded-full text-[8px] font-black border border-indigo-500/30">ANALYTICS →</button>
@@ -62,7 +62,7 @@
             </select>
             <button onclick="changeMonth(1)" class="nav-arrow">›</button>
         </div>
-        <div class="card-base py-1.5"><input type="text" id="customer-search" class="search-input uppercase" placeholder="NAMA/VENUE..." oninput="updateDashboard()"></div>
+        <div class="card-base py-1.5"><input type="text" id="customer-search" class="search-input uppercase" placeholder="CARI NAMA..." oninput="updateDashboard()"></div>
     </div>
 
     <div class="card-base py-1.5 flex items-center justify-between px-2 flex-none text-center">
@@ -130,7 +130,7 @@
             if (savedMode === 'enabled') document.body.classList.add('night-mode');
             if (sessionStorage.getItem('isAuth') === 'true') {
                 document.getElementById('login-gate').style.display = 'none';
-                handleDeepLink();
+                handleInit();
             }
         };
 
@@ -138,20 +138,20 @@
             if (document.getElementById('pin-input').value === APP_PIN) {
                 sessionStorage.setItem('isAuth', 'true');
                 document.getElementById('login-gate').style.display = 'none';
-                handleDeepLink();
+                handleInit();
             } else { alert('PIN Salah!'); }
         }
 
-        async function handleDeepLink() {
+        async function handleInit() {
             const urlParams = new URLSearchParams(window.location.search);
             const venue = urlParams.get('venue');
             if (venue) {
                 document.getElementById('month-select').value = "ALL";
-                document.getElementById('date-input').value = "";
                 document.getElementById('customer-search').value = decodeURIComponent(venue);
                 setStatusFilter('ALL');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } else { setToday(); }
+            } else {
+                setToday();
+            }
             updateDashboard();
         }
 
@@ -230,9 +230,30 @@
             } catch (e) { console.error(e); }
         }
 
+        // LOGIC REFRESH V.6.4 (RE-LOCK)
+        // Fungsi ini akan memaksa dashboard kembali ke hari ini saat diklik.
+        async function refreshData() { 
+            const btn = document.getElementById('btn-refresh'); 
+            btn.classList.add('animate-spin'); 
+            
+            cachedRows = []; // Buang cache
+            document.getElementById('customer-search').value = ""; // Kosongkan search
+            setStatusFilter('ALL'); // Reset Status ke ALL
+            setToday(); // BALIK KE TANGGAL HARI INI (Logic V.6.4)
+            
+            await updateDashboard(); 
+            setTimeout(() => btn.classList.remove('animate-spin'), 600); 
+        }
+
         function cleanVal(s) { return parseFloat((s||"0").toString().replace(/[^0-9,-]+/g, "").replace(",", ".")) || 0; }
         function formatRp(n) { return "Rp" + Math.round(n).toLocaleString('id-ID'); }
-        function setToday() { let n = new Date(); document.getElementById('date-input').value = new Date(n.getTime() - (n.getTimezoneOffset()*60000)).toISOString().split('T')[0]; document.getElementById('month-select').value = (n.getMonth() + 1).toString(); }
+        
+        function setToday() { 
+            let n = new Date(); 
+            document.getElementById('date-input').value = new Date(n.getTime() - (n.getTimezoneOffset()*60000)).toISOString().split('T')[0]; 
+            document.getElementById('month-select').value = (n.getMonth() + 1).toString(); 
+        }
+
         function resetDateOnly() { document.getElementById('date-input').value = ""; updateDashboard(); }
         function syncMonthFromDate() { let v = document.getElementById('date-input').value; if(v) document.getElementById('month-select').value = parseInt(v.split('-')[1]).toString(); updateDashboard(); }
         function changeMonth(dir) { let s = document.getElementById('month-select'); let v = s.value === "ALL" ? 1 : parseInt(s.value) + dir; if(v>12)v=1; if(v<1)v=12; s.value = v.toString(); resetDateOnly(); }
@@ -240,8 +261,19 @@
         function setStatusFilter(s) { currentStatusFilter = s; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); document.getElementById('btn-' + s).classList.add('active'); updateDashboard(); }
         function toggleHighValue() { isHighValueMode = !isHighValueMode; updateDashboard(); }
         function toggleNightMode() { const isNight = document.body.classList.toggle('night-mode'); localStorage.setItem('nightMode', isNight ? 'enabled' : 'disabled'); document.getElementById('night-btn').innerText = isNight ? '☀️' : '🌙'; }
-        function filterAllTentative() { isGlobalTentative = !isGlobalTentative; if(isGlobalTentative) { document.getElementById('month-select').value = "ALL"; resetDateOnly(); setStatusFilter('TENTATIVE'); } else { setToday(); setStatusFilter('ALL'); } }
-        async function refreshData() { const btn = document.getElementById('btn-refresh'); btn.classList.add('animate-spin'); cachedRows = []; await updateDashboard(); setTimeout(() => btn.classList.remove('animate-spin'), 600); }
+        
+        function filterAllTentative() { 
+            isGlobalTentative = !isGlobalTentative; 
+            if(isGlobalTentative) { 
+                document.getElementById('month-select').value = "ALL"; 
+                resetDateOnly(); 
+                setStatusFilter('TENTATIVE'); 
+            } else { 
+                setToday(); 
+                setStatusFilter('ALL'); 
+                updateDashboard(); 
+            } 
+        }
     </script>
 </body>
 </html>
