@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Banquet System Elite V.4.6</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Banquet Elite V.4.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
@@ -15,66 +15,70 @@
             --accent: #6366f1;
         }
         
+        /* FIX CHROME: Pakai height dynamic agar footer tidak terpotong address bar */
         html, body { 
-            height: 100vh; background: var(--bg); 
+            height: 100%;
+            height: -webkit-fill-available;
+            background: var(--bg); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: #f8fafc; margin: 0; padding: 0; overflow: hidden; 
         }
 
-        /* Ambient Glow Background */
         body::before {
             content: ""; position: absolute; top: -5%; right: -5%; width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
             z-index: -1; filter: blur(60px);
         }
 
         .viewport-wrapper { 
-            height: 100vh; display: flex; flex-direction: column; 
-            padding: 12px 16px; box-sizing: border-box; 
+            display: flex; flex-direction: column;
+            height: 100vh;
+            height: -webkit-fill-available;
+            padding: 10px 14px;
+            box-sizing: border-box;
         }
 
-        /* Glassmorphism Main Card */
+        /* Card Flexible tapi tetap Luxury */
         .glass-card { 
             background: var(--glass); 
-            backdrop-filter: blur(25px); 
-            border: 1.5px solid var(--border); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid var(--border); 
             border-radius: 1.5rem; 
-            padding: 18px; 
+            padding: 16px; 
             flex: 1; display: flex; flex-direction: column; justify-content: space-evenly;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            min-height: 0; margin-bottom: 10px;
+            min-height: 0; /* Mencegah overflow */
+            margin-bottom: 8px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
 
-        label { font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.1em; margin-bottom: 2px; display: block; }
+        label { font-size: 8.5px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; margin-bottom: 2px; display: block; }
 
         input, select { 
             background: rgba(15, 23, 42, 0.6); 
             border: 1px solid var(--border); 
-            border-radius: 0.8rem; padding: 10px 12px; 
-            color: white; width: 100%; outline: none; font-size: 14px;
+            border-radius: 0.75rem; padding: 8px 12px; 
+            color: white; width: 100%; outline: none; font-size: 13px;
             transition: all 0.3s ease;
         }
         input:focus { border-color: var(--accent); background: rgba(15, 23, 42, 0.8); }
 
         .btn-sync { 
             background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); 
-            color: white; border-radius: 1rem; font-weight: 800; font-size: 11px; 
-            height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px;
-            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+            color: white; border-radius: 0.9rem; font-weight: 800; font-size: 11px; 
+            height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
 
-        /* Footer Link */
-        .footer-area { flex: 0 0 auto; padding-bottom: env(safe-area-inset-bottom); }
+        /* Footer Dashboard - Anti Address Bar Chrome */
+        .footer-area { 
+            flex: 0 0 auto; 
+            padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+        }
         .footer-link { 
-            background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 1rem; padding: 12px; text-align: center; display: block; text-decoration: none;
+            background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 1rem; padding: 10px; text-align: center; display: block; text-decoration: none;
         }
 
-        /* Tabs & Modal (Sesuai V.3.9) */
         #tentative-modal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(10px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .tab-btn { flex: 1; padding: 8px; border-radius: 10px; font-size: 9px; font-weight: 900; text-transform: uppercase; transition: 0.3s; }
-        .tab-active { background: #6366f1; color: white; }
-        .tab-inactive { background: rgba(255,255,255,0.05); color: #64748b; }
     </style>
 </head>
 <body>
@@ -82,35 +86,35 @@
     <div id="tentative-modal" onclick="closeModal()">
         <div class="modal-content bg-[#0f172a] border border-white/10 w-full max-w-md p-5 rounded-[2rem]" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xs font-black text-white uppercase tracking-widest">📋 DATA SCANNER</h2>
+                <h2 class="text-xs font-black text-white uppercase tracking-widest">📋 SCANNER V.3.9</h2>
                 <button onclick="closeModal()" class="text-slate-400 text-2xl">&times;</button>
             </div>
             <div class="flex gap-2 mb-4">
-                <button onclick="loadFilteredData('TENTATIVE')" id="tab-tentative" class="tab-btn tab-active">Tentative</button>
-                <button onclick="loadFilteredData('CONFIRM')" id="tab-confirm" class="tab-btn tab-inactive">Confirm</button>
-                <button onclick="loadFilteredData('NO STATUS')" id="tab-nostatus" class="tab-btn tab-inactive text-red-400">No Status</button>
+                <button onclick="loadFilteredData('TENTATIVE')" id="tab-tentative" class="tab-btn p-2 flex-1 rounded-lg text-[9px] font-black uppercase bg-[#6366f1] text-white">Tentative</button>
+                <button onclick="loadFilteredData('CONFIRM')" id="tab-confirm" class="tab-btn p-2 flex-1 rounded-lg text-[9px] font-black uppercase bg-white/5 text-slate-500">Confirm</button>
+                <button onclick="loadFilteredData('NO STATUS')" id="tab-nostatus" class="tab-btn p-2 flex-1 rounded-lg text-[9px] font-black uppercase bg-white/5 text-red-400/50">No Status</button>
             </div>
             <div id="list-container" class="space-y-2 max-h-[300px] overflow-y-auto pr-1"></div>
         </div>
     </div>
 
     <div class="viewport-wrapper">
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center justify-between mb-2">
             <div>
-                <h1 class="text-xl font-black italic text-white leading-none">BANQUET <span class="text-indigo-500">PRO</span></h1>
-                <p class="text-[7px] font-bold text-slate-500 tracking-[0.3em] uppercase">V.4.6 Luxury Engine</p>
+                <h1 class="text-lg font-black italic text-white leading-none tracking-tighter">BANQUET <span class="text-indigo-500">PRO</span></h1>
+                <p class="text-[6px] font-bold text-slate-500 tracking-[0.3em] uppercase">V.4.7 Chrome Edition</p>
             </div>
             <div class="flex gap-2">
                 <button onclick="openTentativeModal()" class="p-2 bg-white/5 rounded-xl border border-white/10 relative">
-                    <span class="text-lg">🔔</span>
-                    <span id="notif-badge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#020617]"></span>
+                    <span class="text-sm">🔔</span>
+                    <span id="notif-badge" class="hidden absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
-                <button onclick="resetForm(true)" class="text-[9px] font-black text-red-400 bg-red-500/10 px-3 py-1.5 rounded-xl border border-red-500/20">RESET</button>
+                <button onclick="resetForm(true)" class="text-[8px] font-black text-red-400 bg-red-500/10 px-2.5 py-1 rounded-lg border border-red-500/20">RESET</button>
             </div>
         </div>
 
         <div class="glass-card">
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div><label>📅 Tanggal</label><input type="date" id="input-date" onchange="checkAvailability()"></div>
                 <div><label>🏛️ Venue</label><select id="input-venue" onchange="checkAvailability()">
                     <option value="">-- PILIH --</option>
@@ -121,12 +125,12 @@
                 </select></div>
             </div>
 
-            <div id="avail-status" class="hidden w-full py-2.5 rounded-xl text-[10px] font-black border text-center uppercase tracking-widest"></div>
+            <div id="avail-status" class="hidden w-full py-2 rounded-xl text-[9px] font-black border text-center uppercase tracking-widest"></div>
 
-            <div id="form-details" class="space-y-3 opacity-20 pointer-events-none transition-all duration-500">
+            <div id="form-details" class="space-y-2.5 opacity-20 pointer-events-none transition-all duration-300">
                 <div><label>👤 Customer</label><input type="text" id="input-customer"></div>
                 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div><label>⚡ Status</label><select id="input-status" onchange="updateStatusUI()">
                         <option value="">-- PILIH --</option>
                         <option value="TENTATIVE">TENTATIVE</option>
@@ -138,26 +142,26 @@
                     </select></div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div><label>💼 PIC</label><select id="input-sales"><option value="DWI">DWI</option><option value="TINA">TINA</option></select></div>
                     <div><label>🕒 Waktu</label><input type="text" id="input-time" placeholder="08:00 - 13:00"></div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div><label>👥 Pax</label><input type="number" id="input-pax" oninput="calcTotal()"></div>
                     <div><label>💰 Harga</label><input type="text" id="input-price-display" oninput="formatCurrency(this)"><input type="hidden" id="input-price"></div>
                 </div>
 
-                <div class="bg-indigo-500/10 border border-indigo-500/20 p-3.5 rounded-2xl flex justify-between items-center">
+                <div class="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-xl flex justify-between items-center">
                     <div>
-                        <p class="text-[8px] font-black text-indigo-400 uppercase">Estimated Revenue</p>
-                        <p id="display-total" class="text-xl font-black text-emerald-400">Rp 0</p>
+                        <p class="text-[7px] font-black text-indigo-400 uppercase">Revenue Estimation</p>
+                        <p id="display-total" class="text-lg font-black text-emerald-400">Rp 0</p>
                     </div>
-                    <span class="text-2xl">💎</span>
+                    <span class="text-xl">💎</span>
                 </div>
 
                 <div id="action-area" class="grid grid-cols-1 gap-2">
-                    <button id="btn-delete" onclick="deleteData()" class="hidden bg-red-500/10 border border-red-500/20 text-red-500 py-3 rounded-xl font-bold text-[11px]">🗑️ DELETE DATA</button>
+                    <button id="btn-delete" onclick="deleteData()" class="hidden bg-red-500/10 border border-red-500/20 text-red-500 py-2.5 rounded-xl font-bold text-[10px]">🗑️ DELETE DATA</button>
                     <button id="btn-save" onclick="submitData()" class="btn-sync">🚀 SYNC TO CLOUD</button>
                 </div>
             </div>
@@ -189,29 +193,20 @@
             }
         }
 
-        async function openTentativeModal() {
-            document.getElementById('tentative-modal').style.display = 'flex';
-            loadFilteredData('TENTATIVE');
-        }
-
+        async function openTentativeModal() { document.getElementById('tentative-modal').style.display = 'flex'; loadFilteredData('TENTATIVE'); }
         function closeModal() { document.getElementById('tentative-modal').style.display = 'none'; }
 
         async function loadFilteredData(filterType) {
             const container = document.getElementById('list-container');
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.replace('tab-active', 'tab-inactive'));
-            const activeId = filterType === 'TENTATIVE' ? 'tab-tentative' : (filterType === 'CONFIRM' ? 'tab-confirm' : 'tab-nostatus');
-            document.getElementById(activeId).classList.replace('tab-inactive', 'tab-active');
-            container.innerHTML = '<p class="text-center text-[10px] animate-pulse py-10 text-slate-500 font-black uppercase">Scanning Cloud...</p>';
+            container.innerHTML = '<p class="text-center text-[10px] animate-pulse py-10 text-slate-500">Scanning...</p>';
             try {
                 const now = new Date();
                 const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${monthNames[now.getMonth()]}!A8:D132?key=${API_KEY}`);
                 const data = await res.json();
                 let curDay = "";
                 let filtered = (data.values || []).filter(r => {
-                    if (r[0]) curDay = r[0];
-                    r.dateRef = curDay;
-                    const cust = (r[2] || "").trim();
-                    const stat = (r[3] || "").toUpperCase().trim();
+                    if (r[0]) curDay = r[0]; r.dateRef = curDay;
+                    const cust = (r[2] || "").trim(); const stat = (r[3] || "").toUpperCase().trim();
                     if (filterType === 'TENTATIVE') return stat === 'TENTATIVE';
                     if (filterType === 'CONFIRM') return stat === 'CONFIRM';
                     if (filterType === 'NO STATUS') return cust !== "" && stat === "";
@@ -220,27 +215,21 @@
                 container.innerHTML = filtered.map(r => {
                     const dNum = r.dateRef.match(/\d+/)[0].padStart(2, '0');
                     const isoDate = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${dNum}`;
-                    return `<div onclick="selectFromList('${isoDate}', '${r[1]}')" class="bg-white/5 p-4 rounded-2xl border border-white/10 mb-2 active:scale-95 transition-all">
-                        <p class="text-[11px] font-black text-white uppercase">${r[2]}</p>
-                        <p class="text-[8px] text-slate-500 font-bold uppercase">${r.dateRef} • ${r[1]}</p>
+                    return `<div onclick="selectFromList('${isoDate}', '${r[1]}')" class="bg-white/5 p-4 rounded-xl border border-white/10 mb-2">
+                        <p class="text-[10px] font-black text-white uppercase">${r[2]}</p>
+                        <p class="text-[7px] text-slate-500 uppercase">${r.dateRef} • ${r[1]}</p>
                     </div>`;
-                }).join('') || '<p class="text-center py-10 text-slate-500 text-[10px] font-black uppercase">Tidak ada data</p>';
-            } catch (e) { container.innerHTML = 'Error fetching data!'; }
+                }).join('') || '<p class="text-center py-5 text-slate-600 text-[10px]">KOSONG</p>';
+            } catch (e) { container.innerHTML = 'Error!'; }
         }
 
-        function selectFromList(date, venue) {
-            document.getElementById('input-date').value = date;
-            document.getElementById('input-venue').value = venue.toUpperCase();
-            closeModal(); checkAvailability();
-        }
+        function selectFromList(date, venue) { document.getElementById('input-date').value = date; document.getElementById('input-venue').value = venue.toUpperCase(); closeModal(); checkAvailability(); }
 
         async function checkAvailability() {
-            const dVal = document.getElementById('input-date').value;
-            const vVal = document.getElementById('input-venue').value;
+            const dVal = document.getElementById('input-date').value; const vVal = document.getElementById('input-venue').value;
             if (!dVal || !vVal) return;
             const statusDiv = document.getElementById('avail-status');
-            statusDiv.innerHTML = "CHECKING AVAILABILITY...";
-            statusDiv.className = "w-full py-2.5 rounded-xl text-[10px] font-black border text-center animate-pulse bg-white/5 text-slate-400 border-white/10";
+            statusDiv.innerHTML = "CHECKING..."; statusDiv.className = "w-full py-2 rounded-xl text-[9px] font-black border text-center bg-white/5 text-slate-400 border-white/10 block animate-pulse";
             statusDiv.classList.remove('hidden');
             try {
                 const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${monthNames[new Date(dVal).getMonth()]}!A8:M132?key=${API_KEY}`);
@@ -248,19 +237,17 @@
                 let curDay = "", found = null;
                 (data.values || []).forEach(r => {
                     if (r[0]) curDay = r[0];
-                    if (parseInt(curDay.match(/\d+/)) === new Date(dVal).getDate() && (r[1] || "").trim().toUpperCase() === vVal.toUpperCase()) {
-                        if (r[2]) found = r;
-                    }
+                    if (parseInt(curDay.match(/\d+/)) === new Date(dVal).getDate() && (r[1] || "").trim().toUpperCase() === vVal.toUpperCase()) if (r[2]) found = r;
                 });
                 document.getElementById('form-details').classList.remove('opacity-20', 'pointer-events-none');
                 statusDiv.classList.remove('animate-pulse');
                 if (found) {
                     statusDiv.innerHTML = `⚠️ OCCUPIED: ${found[3] || 'NO STATUS'}`;
-                    statusDiv.className = "w-full py-2.5 rounded-xl text-[10px] font-black border text-center bg-amber-500/10 text-amber-400 border-amber-500/20";
+                    statusDiv.className = "w-full py-2 rounded-xl text-[9px] font-black border text-center bg-amber-500/10 text-amber-400 border-amber-500/20";
                     populateForm(found);
                 } else {
                     statusDiv.innerHTML = "✅ VENUE AVAILABLE";
-                    statusDiv.className = "w-full py-2.5 rounded-xl text-[10px] font-black border text-center bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                    statusDiv.className = "w-full py-2 rounded-xl text-[9px] font-black border text-center bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
                     clearDetailsOnly();
                 }
                 updateStatusUI();
@@ -281,10 +268,8 @@
         }
 
         function formatCurrency(el) {
-            let val = el.value.replace(/[^0-9]/g, '');
-            el.value = val ? "Rp " + new Intl.NumberFormat('id-ID').format(val) : "";
-            document.getElementById('input-price').value = val || 0;
-            calcTotal();
+            let val = el.value.replace(/[^0-9]/g, ''); el.value = val ? "Rp " + new Intl.NumberFormat('id-ID').format(val) : "";
+            document.getElementById('input-price').value = val || 0; calcTotal();
         }
 
         function calcTotal() {
@@ -308,34 +293,14 @@
             try {
                 const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const txt = await res.text();
-                if(txt.includes("SUCCESS")) { alert("✅ Berhasil Sinkronisasi!"); resetForm(true); }
+                if(txt.includes("SUCCESS")) { alert("✅ Berhasil Sinkron!"); resetForm(true); }
                 else { alert("❌ " + txt); }
-            } catch (e) { alert("🚨 Error Koneksi!"); }
-            finally {
-                btnS.innerHTML = "🚀 SYNC TO CLOUD"; btnS.disabled = false;
-                if(btnD) { btnD.innerHTML = "🗑️ DELETE DATA"; btnD.disabled = false; }
-            }
+            } catch (e) { alert("🚨 Error!"); }
+            finally { btnS.innerHTML = "🚀 SYNC TO CLOUD"; btnS.disabled = false; if(btnD) btnD.disabled = false; }
         }
 
-        function deleteData() {
-            if(!confirm("Hapus data banquet ini?")) return;
-            const dVal = document.getElementById('input-date').value;
-            document.getElementById('btn-delete').innerHTML = "WAIT...";
-            sendRequest({ action: "DELETE", sheetName: monthNames[new Date(dVal).getMonth()], date: dVal, venue: document.getElementById('input-venue').value });
-        }
-
-        function submitData() {
-            const dVal = document.getElementById('input-date').value;
-            if(!dVal) return alert("Pilih tanggal!");
-            document.getElementById('btn-save').innerHTML = "SYNCING...";
-            sendRequest({
-                action: "UPDATE", sheetName: monthNames[new Date(dVal).getMonth()], date: dVal,
-                venue: document.getElementById('input-venue').value, customer: document.getElementById('input-customer').value,
-                status: document.getElementById('input-status').value, package: document.getElementById('input-package').value,
-                sales: document.getElementById('input-sales').value, time: document.getElementById('input-time').value,
-                pax: document.getElementById('input-pax').value, price: document.getElementById('input-price').value
-            });
-        }
+        function deleteData() { if(confirm("Hapus data ini?")) sendRequest({ action: "DELETE", sheetName: monthNames[new Date(document.getElementById('input-date').value).getMonth()], date: document.getElementById('input-date').value, venue: document.getElementById('input-venue').value }); }
+        function submitData() { sendRequest({ action: "UPDATE", sheetName: monthNames[new Date(document.getElementById('input-date').value).getMonth()], date: document.getElementById('input-date').value, venue: document.getElementById('input-venue').value, customer: document.getElementById('input-customer').value, status: document.getElementById('input-status').value, package: document.getElementById('input-package').value, sales: document.getElementById('input-sales').value, time: document.getElementById('input-time').value, pax: document.getElementById('input-pax').value, price: document.getElementById('input-price').value }); }
     </script>
 </body>
 </html>
