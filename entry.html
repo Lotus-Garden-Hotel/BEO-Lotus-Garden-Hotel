@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Banquet System Pro V.3.6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        :root { --bg: #020617; }
+        html, body { height: 100vh; overflow: hidden; background: var(--bg); font-family: 'Plus Jakarta Sans', sans-serif; color: #f8fafc; margin: 0; padding: 0; }
+        .viewport-wrapper { height: 100vh; display: flex; flex-direction: column; padding: 8px 12px; }
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 2px solid rgba(255,255,255,0.08); border-radius: 1.2rem; padding: 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
+        input, select { background: rgba(15, 23, 42, 0.7); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 0.8rem; padding: 12px; color: white; width: 100%; outline: none; font-size: 14px; font-weight: 600; }
+        label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px; display: block; }
+        .btn-sync { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border-radius: 0.9rem; font-weight: 800; font-size: 11px; height: 50px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        /* Modal Style */
+        #tentative-modal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px); z-index: 50; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; border-radius: 1.5rem; padding: 20px; }
+        .tab-btn { flex: 1; padding: 8px; border-radius: 10px; transition: all 0.3s; font-size: 9px; font-weight: 900; text-transform: uppercase; }
+        .tab-active { background: #6366f1; color: white; }
+        .tab-inactive { background: rgba(255,255,255,0.05); color: #64748b; }
+    </style>
+</head>
+<body>
+
+    <div id="tentative-modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-black text-white uppercase tracking-widest">📋 DATA SCANNER</h2>
+                <button onclick="closeModal()" class="text-slate-400 text-2xl">&times;</button>
+            </div>
+            
+            <div class="flex gap-2 mb-4">
+                <button onclick="loadFilteredData('TENTATIVE')" id="tab-tentative" class="tab-btn tab-active">Tentative</button>
+                <button onclick="loadFilteredData('CONFIRM')" id="tab-confirm" class="tab-btn tab-inactive">Confirm</button>
+                <button onclick="loadFilteredData('NO STATUS')" id="tab-nostatus" class="tab-btn tab-inactive text-red-400">No Status</button>
+            </div>
+
+            <div id="list-container" class="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                </div>
+        </div>
+    </div>
+
+    <div class="viewport-wrapper">
+        <div class="flex items-center justify-between mb-2">
+            <div>
+                <h1 class="text-xl font-black italic text-indigo-400">BANQUET <span class="text-white">PRO</span></h1>
+                <p class="text-[7px] font-bold text-slate-500 tracking-[0.2em]">V.3.6 HYBRID STABLE</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openTentativeModal()" class="p-2 bg-white/5 rounded-lg border border-white/10 relative">
+                    <span class="text-lg">🔔</span>
+                    <span id="notif-badge" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#020617]"></span>
+                </button>
+                <button onclick="resetForm(true)" class="text-[9px] font-black text-red-400 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20">RESET</button>
+            </div>
+        </div>
+
+        <div id="main-card" class="glass-card">
+            <div class="grid grid-cols-2 gap-4">
+                <div><label>📅 Tanggal</label><input type="date" id="input-date" onchange="checkAvailability()"></div>
+                <div><label>🏛️ Venue</label><select id="input-venue" onchange="checkAvailability()">
+                    <option value="">-- PILIH --</option>
+                    <option value="BALL ROOM">BALL ROOM</option>
+                    <option value="VIP ROOM">VIP ROOM</option>
+                    <option value="TERATAI ROOM">TERATAI ROOM</option>
+                    <option value="FOX STEAK HOUSE">FOX STEAK HOUSE</option>
+                </select></div>
+            </div>
+
+            <div id="avail-status" class="hidden w-full py-2.5 rounded-lg text-[10px] font-black border text-center uppercase"></div>
+
+            <div id="form-details" class="space-y-3 opacity-20 pointer-events-none">
+                <div><label>👤 Customer</label><input type="text" id="input-customer"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label>⚡ Status</label><select id="input-status" onchange="updateStatusUI()">
+                        <option value="">-- PILIH --</option>
+                        <option value="TENTATIVE">TENTATIVE</option>
+                        <option value="CONFIRM">CONFIRM</option>
+                        <option value="DONE">DONE</option>
+                    </select></div>
+                    <div><label>📦 Package</label><select id="input-package">
+                        <option value="">-- PILIH --</option>
+                        <option value="DINNER">DINNER</option>
+                        <option value="FULL BOARD">FULL BOARD</option>
+                        <option value="HALF DAY">HALF DAY</option>
+                        <option value="FULL DAY">FULL DAY</option>
+                        <option value="WEDDING">WEDDING</option>
+                        <option value="AKAD NIKAH">AKAD NIKAH</option>
+                        <option value="ARISAN">ARISAN</option>
+                        <option value="ULANG TAHUN">ULANG TAHUN</option>
+                        <option value="TABLE MANER">TABLE MANER</option>
+                        <option value="LUNCH">LUNCH</option>
+                    </select></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label>💼 Sales</label><select id="input-sales"><option value="DWI">DWI</option><option value="TINA">TINA</option></select></div>
+                    <div><label>🕒 Waktu</label><input type="text" id="input-time" placeholder="08:00 - 13:00"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label>👥 Pax</label><input type="number" id="input-pax" oninput="calcTotal()"></div>
+                    <div><label>💰 Harga</label><input type="text" id="input-price-display" oninput="formatCurrency(this)"><input type="hidden" id="input-price"></div>
+                </div>
+                <div class="bg-indigo-500/10 border border-indigo-500/20 p-3.5 rounded-xl">
+                    <p class="text-[8px] font-black text-indigo-400 uppercase">Estimasi Revenue</p>
+                    <p id="display-total" class="text-xl font-black text-emerald-400">Rp 0</p>
+                </div>
+                <div id="action-area" class="grid grid-cols-1 gap-2">
+                    <button id="btn-delete" onclick="deleteData()" class="hidden bg-red-500/10 border border-red-500/20 text-red-500 py-3 rounded-xl font-bold text-[11px]">🗑️ DELETE DATA</button>
+                    <button id="btn-save" onclick="submitData()" class="btn-sync">🚀 SYNC TO CLOUD</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyBZjSmOA81ftVsIJT5etEL19NjPdYTVSQk';
+        const SHEET_ID = '1MXwfVXORuTd125BCkKYP_mHC_6O_Z1mZcGno2VCGOeE';
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzEbOY6AORyB1x9bXASGwnesU2PCmL8YmE0pVUwfSL7JCTOmPF_OM2AzOjjEqqoY_bb/exec';
+        const monthNames = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+
+        // --- Logic UI ---
+        function updateStatusUI() {
+            const status = document.getElementById('input-status').value;
+            const btnDel = document.getElementById('btn-delete');
+            const area = document.getElementById('action-area');
+            if (status === "TENTATIVE" || status === "") {
+                btnDel.classList.remove('hidden');
+                area.style.gridTemplateColumns = '1fr 2fr';
+            } else {
+                btnDel.classList.add('hidden');
+                area.style.gridTemplateColumns = '1fr';
+            }
+        }
+
+        // --- Logic Modal & Scanner ---
+        async function openTentativeModal() {
+            document.getElementById('tentative-modal').style.display = 'flex';
+            loadFilteredData('TENTATIVE');
+        }
+
+        async function loadFilteredData(filterType) {
+            const container = document.getElementById('list-container');
+            
+            // UI Tab Toggle
+            document.querySelectorAll('.tab-btn').forEach(b => { b.classList.replace('tab-active', 'tab-inactive'); });
+            const activeId = filterType === 'TENTATIVE' ? 'tab-tentative' : (filterType === 'CONFIRM' ? 'tab-confirm' : 'tab-nostatus');
+            document.getElementById(activeId).classList.replace('tab-inactive', 'tab-active');
+
+            container.innerHTML = '<p class="text-center text-[10px] animate-pulse py-10 text-slate-500 uppercase font-black tracking-widest">Scanning Data...</p>';
+            
+            try {
+                const now = new Date();
+                const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${monthNames[now.getMonth()]}!A8:D132?key=${API_KEY}`);
+                const data = await res.json();
+                let currentDay = "";
+                
+                let filtered = (data.values || []).filter(r => {
+                    if (r[0]) currentDay = r[0];
+                    r.dateRef = currentDay;
+                    const customer = (r[2] || "").trim();
+                    const status = (r[3] || "").toUpperCase().trim();
+
+                    if (filterType === 'TENTATIVE') return status === 'TENTATIVE';
+                    if (filterType === 'CONFIRM') return status === 'CONFIRM';
+                    if (filterType === 'NO STATUS') return customer !== "" && status === "";
+                    return false;
+                });
+
+                let html = filtered.map(r => {
+                    const dNum = r.dateRef.match(/\d+/)[0].padStart(2, '0');
+                    const mNum = (now.getMonth() + 1).toString().padStart(2, '0');
+                    const isoDate = `${now.getFullYear()}-${mNum}-${dNum}`;
+                    let borderCol = filterType === 'CONFIRM' ? 'border-emerald-500/30' : (filterType === 'NO STATUS' ? 'border-red-500/30' : 'border-white/10');
+                    
+                    return `<div onclick="selectFromList('${isoDate}', '${r[1]}')" class="bg-white/5 p-4 rounded-xl border ${borderCol} active:scale-95 transition-all">
+                        <div class="flex justify-between items-start">
+                            <p class="text-[11px] font-black text-white uppercase">${r[2]}</p>
+                            <span class="text-[7px] font-black opacity-50 uppercase">${filterType}</span>
+                        </div>
+                        <p class="text-[8px] text-slate-500 font-bold mt-1 uppercase">${r.dateRef} • ${r[1]}</p>
+                    </div>`;
+                }).join('');
+
+                container.innerHTML = html || `<p class="text-center text-[10px] text-slate-500 py-10 uppercase font-black">Tidak ada data</p>`;
+            } catch (e) { container.innerHTML = '<p class="text-center text-red-500 text-[10px]">Error loading data</p>'; }
+        }
+
+        function selectFromList(date, venue) {
+            document.getElementById('input-date').value = date;
+            document.getElementById('input-venue').value = venue.toUpperCase();
+            closeModal();
+            checkAvailability();
+        }
+
+        function closeModal() { document.getElementById('tentative-modal').style.display = 'none'; }
+
+        // --- Logic Check Data ---
+        async function checkAvailability() {
+            const dVal = document.getElementById('input-date').value;
+            const vVal = document.getElementById('input-venue').value;
+            if (!dVal || !vVal) return;
+            
+            const statusDiv = document.getElementById('avail-status');
+            statusDiv.innerHTML = "MENCARI DATA...";
+            statusDiv.className = "w-full py-2.5 rounded-lg text-[10px] font-black border text-center animate-pulse bg-white/5";
+            statusDiv.classList.remove('hidden');
+
+            try {
+                const selDate = new Date(dVal);
+                const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${monthNames[selDate.getMonth()]}!A8:M132?key=${API_KEY}`);
+                const data = await res.json();
+                let currentDay = "", found = null;
+                
+                (data.values || []).forEach(r => {
+                    if (r[0]) currentDay = r[0];
+                    if (parseInt(currentDay.match(/\d+/)) === selDate.getDate() && (r[1] || "").trim().toUpperCase() === vVal.toUpperCase()) {
+                        if (r[2]) found = r;
+                    }
+                });
+
+                document.getElementById('form-details').classList.remove('opacity-20', 'pointer-events-none');
+                statusDiv.classList.remove('animate-pulse');
+                
+                if (found) {
+                    statusDiv.innerHTML = `⚠️ TERISI: ${found[3] || 'TIDAK ADA STATUS'}`;
+                    statusDiv.className = "w-full py-2.5 rounded-lg text-[10px] font-black border text-center bg-amber-500/10 text-amber-400 border-amber-500/20";
+                    populateForm(found);
+                } else {
+                    statusDiv.innerHTML = "✅ TERSEDIA";
+                    statusDiv.className = "w-full py-2.5 rounded-lg text-[10px] font-black border text-center bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                    clearDetailsOnly();
+                }
+                updateStatusUI();
+            } catch (e) { console.error(e); }
+        }
+
+        function populateForm(r) {
+            document.getElementById('input-customer').value = r[2] || "";
+            document.getElementById('input-status').value = (r[3] || "").toUpperCase();
+            document.getElementById('input-package').value = (r[4] || "").toUpperCase();
+            document.getElementById('input-sales').value = (r[6] || "").toUpperCase();
+            document.getElementById('input-time').value = r[7] || "";
+            const px = r[9] ? r[9].toString().replace(/[^0-9]/g, '') : 0;
+            document.getElementById('input-pax').value = px;
+            const pr = r[10] ? r[10].toString().replace(/[^0-9]/g, '') : 0;
+            document.getElementById('input-price').value = pr;
+            document.getElementById('input-price-display').value = pr > 0 ? "Rp " + new Intl.NumberFormat('id-ID').format(pr) : "";
+            calcTotal();
+        }
+
+        // --- Logic Helper ---
+        function formatCurrency(el) {
+            let val = el.value.replace(/[^0-9]/g, '');
+            el.value = val ? "Rp " + new Intl.NumberFormat('id-ID').format(val) : "";
+            document.getElementById('input-price').value = val || 0;
+            calcTotal();
+        }
+
+        function calcTotal() {
+            const total = (document.getElementById('input-pax').value || 0) * (document.getElementById('input-price').value || 0);
+            document.getElementById('display-total').innerText = "Rp " + total.toLocaleString('id-ID');
+        }
+
+        function clearDetailsOnly() {
+            ['input-customer', 'input-pax', 'input-price', 'input-price-display', 'input-time', 'input-status'].forEach(id => document.getElementById(id).value = "");
+            document.getElementById('display-total').innerText = "Rp 0";
+        }
+
+        function resetForm(full) {
+            if(full) { 
+                document.getElementById('input-date').value = ""; 
+                document.getElementById('input-venue').value = ""; 
+                document.getElementById('form-details').classList.add('opacity-20', 'pointer-events-none'); 
+            }
+            clearDetailsOnly();
+            document.getElementById('avail-status').classList.add('hidden');
+        }
+
+        // --- Logic Server Sync ---
+        async function sendRequest(payload) {
+            const btnS = document.getElementById('btn-save');
+            const btnD = document.getElementById('btn-delete');
+            try {
+                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const txt = await res.text();
+                if(txt.includes("SUCCESS")) { 
+                    alert("✅ " + txt.split(": ")[1]); 
+                    resetForm(true); 
+                } else { 
+                    alert("❌ " + txt); 
+                }
+            } catch (e) { alert("🚨 KONEKSI ERROR!"); }
+            finally {
+                btnS.innerHTML = "🚀 SYNC TO CLOUD"; btnS.disabled = false;
+                btnD.innerHTML = "🗑️ DELETE DATA"; btnD.disabled = false;
+            }
+        }
+
+        function deleteData() {
+            if(!confirm("Hapus data?")) return;
+            const dateVal = document.getElementById('input-date').value;
+            document.getElementById('btn-delete').innerHTML = "WAIT...";
+            sendRequest({
+                action: "DELETE",
+                sheetName: monthNames[new Date(dateVal).getMonth()],
+                date: dateVal,
+                venue: document.getElementById('input-venue').value
+            });
+        }
+
+        function submitData() {
+            const dateVal = document.getElementById('input-date').value;
+            if(!dateVal) return alert("Pilih tanggal!");
+            document.getElementById('btn-save').innerHTML = "SYNCING...";
+            sendRequest({
+                action: "UPDATE",
+                sheetName: monthNames[new Date(dateVal).getMonth()],
+                date: dateVal,
+                venue: document.getElementById('input-venue').value,
+                customer: document.getElementById('input-customer').value,
+                status: document.getElementById('input-status').value,
+                package: document.getElementById('input-package').value,
+                sales: document.getElementById('input-sales').value,
+                time: document.getElementById('input-time').value,
+                pax: document.getElementById('input-pax').value,
+                price: document.getElementById('input-price').value
+            });
+        }
+    </script>
+</body>
+</html>
